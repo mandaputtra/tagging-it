@@ -21,6 +21,9 @@ defmodule TaggingItWeb.Router do
 
     # PROTOTYPE — label print flow exploration (#9). Throwaway; delete after verdict.
     get "/prototype/print", PrintPrototypeController, :show
+
+    # Real SheetView print flow — batch data arrives from the browser store.
+    live "/sheet/:batch_id", SheetLive
   end
 
   # Other scopes may use custom stacks.

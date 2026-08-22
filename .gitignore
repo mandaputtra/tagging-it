@@ -25,3 +25,6 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 tagging_it-*.tar
 
+
+# Node modules (assets/)
+/assets/node_modules/

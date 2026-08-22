@@ -1,0 +1,99 @@
+<div id="sheet-view">
+  <%= if @error do %>
+    <div class="sheet-error" role="alert">
+      <%= @error %>
+    </div>
+  <% else %>
+    <%= if @batch do %>
+      <div class="sheet-toolbar">
+        <strong><%= @batch["name"] %></strong>
+        <span class="sheet-meta"><%= length(@codes) %> labels · <%= @sheet.cols %>×<%= @sheet.rows %> grid</span>
+        <button type="button" class="sheet-print" onclick="window.print()">Print</button>
+      </div>
+
+      <%= if @codes == [] do %>
+        <div class="sheet-empty">No codes in this batch yet.</div>
+      <% else %>
+        <div class="sheet-stack">
+          <%= for page <- Enum.chunk_every(@codes, @sheet.capacity) do %>
+            <div class="sheet">
+              <%= for code <- page do %>
+                <div class="label" id={"label-#{code["id"]}"} data-code-data={code["code_data"]}>
+                  <div
+                    class="barcode"
+                    data-bcid={code["symbology"] || "code128"}
+                    data-text={code["code_data"]}
+                    role="img"
+                    aria-label={"Barcode #{code["code_data"]}"}
+                  ></div>
+                  <div class="lines">
+                    <%= for field <- code["fields"] do %>
+                      <div class="line">
+                        <span class="line-name"><%= field["name"] %></span>
+                        <form
+                          id={"field-#{code["id"]}-#{field["name"]}"}
+                          class="line-form"
+                          phx-change="field:update"
+                          phx-submit="field:update"
+                          phx-value-code-id={code["id"]}
+                          phx-value-name={field["name"]}
+                        >
+                          <input
+                            type="text"
+                            name="value"
+                            data-field-name={field["name"]}
+                            value={field["value"]}
+                            class="line-input"
+                          />
+                        </form>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="sheet-loading">Loading sheet…</div>
+    <% end %>
+  <% end %>
+</div>
+
+<style>
+  /* SheetView print flow — variant B full-sheet grid + variant C live field editing (#9).
+     Geometry per docs/research/print-layout.md: Avery 5160, letter sheet, 3×10 grid,
+     labels 2.625in × 1in; @page letter, margin 0. */
+  #sheet-view { font-family: system-ui, -apple-system, sans-serif; }
+  #sheet-view .sheet-error,
+  #sheet-view .sheet-loading,
+  #sheet-view .sheet-empty { color: #6b7280; padding: 24px; text-align: center; }
+  #sheet-view .sheet-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  #sheet-view .sheet-toolbar strong { font-size: 15px; }
+  #sheet-view .sheet-meta { font-size: 12px; color: #6b7280; }
+  #sheet-view .sheet-print { margin-left: auto; font-size: 13px; padding: 6px 14px; border: 1px solid #2563eb; border-radius: 6px; background: #2563eb; color: #fff; cursor: pointer; }
+  #sheet-view .sheet-stack { overflow-x: auto; }
+  #sheet-view .sheet { width: 8.5in; min-height: 11in; margin: 0 auto 24px; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); box-sizing: border-box; padding: 0.5in 0.3125in; display: flex; flex-wrap: wrap; align-content: flex-start; }
+  #sheet-view .label { width: 2.625in; height: 1in; box-sizing: border-box; padding: 2px 4px; display: flex; flex-direction: column; justify-content: center; gap: 1px; font-size: 9px; break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; border-bottom: 1px dotted #e5e7eb; }
+  #sheet-view .barcode { text-align: center; }
+  #sheet-view .barcode svg { max-width: 100%; height: auto; }
+  #sheet-view .line { display: flex; align-items: center; gap: 3px; white-space: nowrap; overflow: hidden; }
+  #sheet-view .line-name { font-weight: 700; flex-shrink: 0; }
+  #sheet-view .line-form { flex: 1; min-width: 0; display: flex; }
+  #sheet-view .line-input { flex: 1; min-width: 0; font-size: 9px; padding: 0 2px; border: none; border-bottom: 1px dotted #d1d5db; background: transparent; }
+  #sheet-view .line-input:focus { outline: none; border-bottom-color: #2563eb; background: #f8fafc; }
+
+  @page { size: 8.5in 11in; margin: 0; }
+  @media print {
+    body > header { display: none !important; }
+    main { padding: 0 !important; }
+    main > div { max-width: none !important; }
+    #sheet-view .sheet-toolbar, #sheet-view .sheet-meta { display: none !important; }
+    #sheet-view .sheet-stack { overflow: visible; }
+    #sheet-view .sheet { margin: 0; box-shadow: none; border: none; }
+    #sheet-view .label { border: none; }
+    #sheet-view .line-input { border-bottom: none; }
+    #sheet-view .sheet + .sheet { page-break-before: always; }
+  }
+</style>

@@ -79,14 +79,26 @@ defmodule TaggingItWeb.LandingLive do
           <% else %>
             <ul id="recent-batches-list" class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <li :for={batch <- @recent_batches} class="rounded-lg border border-hairline bg-canvas p-5">
-                <a href={"/sheet/" <> batch["id"]} class="group block">
-                  <h3 class="font-semibold text-ink group-hover:text-brand">
-                    <%= batch["name"] %>
-                  </h3>
-                  <p class="mt-1 text-sm text-steel">
-                    <%= batch["code_count"] %> <%= if batch["code_count"] == 1, do: "label", else: "labels" %>
-                  </p>
-                </a>
+                <div class="flex items-start justify-between gap-3">
+                  <a href={"/sheet/" <> batch["id"]} class="group block min-w-0">
+                    <h3 class="truncate font-semibold text-ink group-hover:text-brand">
+                      <%= batch["name"] %>
+                    </h3>
+                    <p class="mt-1 text-sm text-steel">
+                      <%= batch["code_count"] %> <%= if batch["code_count"] == 1, do: "label", else: "labels" %>
+                    </p>
+                  </a>
+                  <button
+                    type="button"
+                    id={"delete-" <> batch["id"]}
+                    phx-hook="BatchDelete"
+                    data-batch-id={batch["id"]}
+                    class="shrink-0 rounded-md border border-hairline px-2 py-1 text-xs font-medium text-steel hover:border-error hover:text-error"
+                    aria-label={"Delete " <> batch["name"]}
+                  >
+                    Delete
+                  </button>
+                </div>
               </li>
             </ul>
           <% end %>

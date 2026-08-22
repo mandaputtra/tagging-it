@@ -9697,8 +9697,23 @@ async function codesByBatch(batchId) {
   const db = await open();
   return db.getAllFromIndex("codes", "batchId", batchId);
 }
+async function deleteBatch(id) {
+  const db = await open();
+  const tx = db.transaction(["batches", "codes"], "readwrite");
+  const codeIds = await tx.objectStore("codes").index("batchId").getAllKeys(id);
+  for (const codeId of codeIds) {
+    await tx.objectStore("codes").delete(codeId);
+  }
+  await tx.objectStore("batches").delete(id);
+  await tx.done;
+}
 
 // js/batch_creator.js
+async function deleteBatchAndRefresh(batchId) {
+  if (!batchId) throw new Error("deleteBatchAndRefresh: missing batch id");
+  await deleteBatch(batchId);
+  return listBatches();
+}
 async function persistAndGo(batch, codes) {
   if (!(batch == null ? void 0 : batch.id)) throw new Error("persistAndGo: missing batch");
   if (!Array.isArray(codes)) throw new Error("persistAndGo: codes must be a list");
@@ -58898,6 +58913,38 @@ FontLib.loadFont("OCR-B", 96, 100, "AAEAAAAPAIAAAwBwRkZUTXxHn14AADmUAAAAHEdERUYA
 // js/app.js
 var Hooks2 = {};
 Hooks2.RecentBatches = RecentBatches;
+Hooks2.BatchDelete = {
+  mounted() {
+    this.el.addEventListener("click", async (ev) => {
+      ev.preventDefault();
+      const id = this.el.dataset.batchId;
+      if (!id) return;
+      if (!window.confirm("Delete this batch and its labels?")) return;
+      try {
+        const remaining = await deleteBatchAndRefresh(id);
+        this.pushEvent("recent:loaded", { batches: recentBatchesPayload(remaining) });
+      } catch (err) {
+        console.error("BatchDelete: failed to delete batch", err);
+      }
+    });
+  }
+};
+Hooks2.SheetDelete = {
+  mounted() {
+    this.el.addEventListener("click", async (ev) => {
+      ev.preventDefault();
+      const id = this.el.dataset.batchId;
+      if (!id) return;
+      if (!window.confirm("Delete this batch and its labels?")) return;
+      try {
+        await deleteBatchAndRefresh(id);
+        window.location.href = "/";
+      } catch (err) {
+        console.error("SheetDelete: failed to delete batch", err);
+      }
+    });
+  }
+};
 Hooks2.BatchCreator = {
   mounted() {
     this.handleEvent("batch:created", async ({ batch, codes }) => {

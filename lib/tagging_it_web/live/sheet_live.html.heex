@@ -9,6 +9,15 @@
         <strong><%= @batch["name"] %></strong>
         <span class="sheet-meta"><%= length(@codes) %> labels · <%= @sheet.cols %>×<%= @sheet.rows %> grid</span>
         <button type="button" class="sheet-print" onclick="window.print()">Print</button>
+        <button
+          type="button"
+          id="sheet-delete"
+          class="sheet-delete"
+          phx-hook="SheetDelete"
+          data-batch-id={@batch["id"]}
+        >
+          Delete batch
+        </button>
       </div>
 
       <%= if @codes == [] do %>
@@ -73,6 +82,8 @@
   #sheet-view .sheet-toolbar strong { font-size: 15px; }
   #sheet-view .sheet-meta { font-size: 12px; color: #6b7280; }
   #sheet-view .sheet-print { margin-left: auto; font-size: 13px; padding: 6px 14px; border: 1px solid #2563eb; border-radius: 6px; background: #2563eb; color: #fff; cursor: pointer; }
+  #sheet-view .sheet-delete { font-size: 13px; padding: 6px 14px; border: 1px solid #e03131; border-radius: 6px; background: #fff; color: #e03131; cursor: pointer; }
+  #sheet-view .sheet-delete:hover { background: #e03131; color: #fff; }
   #sheet-view .sheet-stack { overflow-x: auto; }
   #sheet-view .sheet { width: 8.5in; min-height: 11in; margin: 0 auto 24px; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); box-sizing: border-box; padding: 0.5in 0.3125in; display: flex; flex-wrap: wrap; align-content: flex-start; }
   #sheet-view .label { width: 2.625in; height: 1in; box-sizing: border-box; padding: 2px 4px; display: flex; flex-direction: column; justify-content: center; gap: 1px; font-size: 9px; break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; border-bottom: 1px dotted #e5e7eb; }

@@ -28,6 +28,8 @@ defmodule TaggingItWeb.LandingLiveTest do
     assert find(html, "a[href='/sheet/b-1']") != []
     assert find(html, "a[href='/sheet/b-2']") != []
     assert text(html) =~ "3"
+    assert find(html, "button[phx-hook='BatchDelete'][data-batch-id='b-1']") != []
+    assert find(html, "button[phx-hook='BatchDelete'][data-batch-id='b-2']") != []
   end
 
   test "renders no recent section before the client reports batches" do

@@ -26,6 +26,8 @@ defmodule TaggingItWeb.SheetLiveTest do
 
       assert length(find(html, ".label")) == length(codes)
 
+      assert find(html, ~s(button[phx-hook='SheetDelete'][data-batch-id="#{batch.id}"])) != []
+
       for code <- codes do
         assert [label] = find(html, ~s(.label[data-code-data="#{code.code_data}"]))
         assert [barcode] = Floki.find(label, ".barcode")

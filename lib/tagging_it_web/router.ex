@@ -24,6 +24,7 @@ defmodule TaggingItWeb.Router do
 
     # Real SheetView print flow — batch data arrives from the browser store.
     live "/sheet/:batch_id", SheetLive
+    live "/batches/new", BatchFormLive
   end
 
   # Other scopes may use custom stacks.

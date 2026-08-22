@@ -9673,6 +9673,18 @@ function open() {
   }
   return dbPromise;
 }
+async function putBatch(batch) {
+  const db = await open();
+  await db.put("batches", batch);
+}
+async function putCodes(codes) {
+  const db = await open();
+  const tx = db.transaction("codes", "readwrite");
+  for (const code of codes) {
+    await tx.store.put(code);
+  }
+  await tx.done;
+}
 async function getBatch(id) {
   const db = await open();
   return db.get("batches", id);
@@ -9680,6 +9692,15 @@ async function getBatch(id) {
 async function codesByBatch(batchId) {
   const db = await open();
   return db.getAllFromIndex("codes", "batchId", batchId);
+}
+
+// js/batch_creator.js
+async function persistAndGo(batch, codes) {
+  if (!(batch == null ? void 0 : batch.id)) throw new Error("persistAndGo: missing batch");
+  if (!Array.isArray(codes)) throw new Error("persistAndGo: codes must be a list");
+  await putBatch(batch);
+  await putCodes(codes);
+  window.location.href = `/sheet/${batch.id}`;
 }
 
 // js/sheet_bridge.js
@@ -58849,6 +58870,17 @@ FontLib.loadFont("OCR-B", 96, 100, "AAEAAAAPAIAAAwBwRkZUTXxHn14AADmUAAAAHEdERUYA
 
 // js/app.js
 var Hooks2 = {};
+Hooks2.BatchCreator = {
+  mounted() {
+    this.handleEvent("batch:created", async ({ batch, codes }) => {
+      try {
+        await persistAndGo(batch, codes);
+      } catch (err) {
+        console.error("BatchCreator: failed to persist batch", err);
+      }
+    });
+  }
+};
 Hooks2.SheetLoader = {
   async mounted() {
     const batchId = this.el.dataset.batchId;

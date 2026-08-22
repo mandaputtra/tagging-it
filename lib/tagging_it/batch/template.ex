@@ -13,12 +13,14 @@ defmodule TaggingIt.Batch.Template do
   defstruct name: nil,
             fields: [],
             strategy: nil,
-            symbology: "code128"
+            symbology: "code128",
+            label_size: "avery5160"
 
   @type t :: %__MODULE__{
           name: String.t(),
           fields: [Field.t()],
           strategy: PatternStrategy.t() | UlidStrategy.t(),
-          symbology: String.t()
+          symbology: String.t(),
+          label_size: String.t()
         }
 end

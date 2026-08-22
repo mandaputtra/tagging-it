@@ -3,10 +3,25 @@
 import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import { getBatch, codesByBatch } from "./batch_store";
+import { persistAndGo } from "./batch_creator";
 import { buildSheetPayload, renderBarcodes } from "./sheet_bridge";
 import { toSVG } from "bwip-js/browser";
 
 let Hooks = {};
+
+// BatchForm: when the server pushes a created batch, persist it in IndexedDB
+// and navigate to its sheet. Free tier stores everything client-side.
+Hooks.BatchCreator = {
+  mounted() {
+    this.handleEvent("batch:created", async ({ batch, codes }) => {
+      try {
+        await persistAndGo(batch, codes);
+      } catch (err) {
+        console.error("BatchCreator: failed to persist batch", err);
+      }
+    });
+  },
+};
 
 // SheetView: free tier is browser-only. On mount, read the batch + codes from
 // IndexedDB and push them to SheetLive; after each morph, draw the barcode SVGs.

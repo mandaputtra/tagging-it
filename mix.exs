@@ -47,7 +47,8 @@ defmodule TaggingIt.MixProject do
       {:gettext, "~> 0.26"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
-      {:bandit, "~> 1.5"}
+      {:bandit, "~> 1.5"},
+      {:esbuild, "~> 0.8", runtime: Mix.env() == :dev}
     ]
   end
 
@@ -59,7 +60,10 @@ defmodule TaggingIt.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get"]
+      setup: ["deps.get", "assets.setup"],
+      "assets.setup": ["cmd npm install --prefix assets"],
+      "assets.build": ["cmd npm run build --prefix assets"],
+      "assets.deploy": ["esbuild default --minify", "cmd npm run deploy --prefix assets"]
     ]
   end
 end

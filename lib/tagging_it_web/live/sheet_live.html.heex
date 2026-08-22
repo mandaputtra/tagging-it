@@ -1,4 +1,4 @@
-<div id="sheet-view">
+<div id="sheet-view" phx-hook="SheetLoader" data-batch-id={@batch_id}>
   <%= if @error do %>
     <div class="sheet-error" role="alert">
       <%= @error %>

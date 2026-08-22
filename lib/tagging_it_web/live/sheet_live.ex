@@ -24,9 +24,21 @@ defmodule TaggingItWeb.SheetLive do
   @sheet_rows 10
 
   @impl true
+  def mount(%{"batch_id" => batch_id}, _session, socket) do
+    {:ok,
+     assign(socket,
+       batch_id: batch_id,
+       batch: nil,
+       codes: [],
+       error: nil,
+       sheet: %{cols: @sheet_cols, rows: @sheet_rows, capacity: @sheet_capacity}
+     )}
+  end
+
   def mount(_params, _session, socket) do
     {:ok,
      assign(socket,
+       batch_id: nil,
        batch: nil,
        codes: [],
        error: nil,

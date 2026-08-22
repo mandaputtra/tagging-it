@@ -3,13 +3,21 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "build": "esbuild js/app.js --bundle --outdir=../priv/static/assets --target=es2017 --format=esm --sourcemap",
+    "deploy": "npm run build"
   },
   "dependencies": {
-    "idb": "^8.0.3"
+    "bwip-js": "^4.11.4",
+    "idb": "^8.0.3",
+    "phoenix": "file:../deps/phoenix",
+    "phoenix_html": "file:../deps/phoenix_html",
+    "phoenix_live_view": "file:../deps/phoenix_live_view"
   },
   "devDependencies": {
+    "esbuild": "^0.27.0",
     "fake-indexeddb": "^6.2.5",
+    "happy-dom": "^20.11.6",
     "vitest": "^4.1.11"
   }
 }

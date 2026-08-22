@@ -38,6 +38,15 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+# Asset build (esbuild). Bundle assets/js/app.js → priv/static/assets/app.js.
+config :esbuild,
+  version: "0.27.0",
+  default: [
+    args: ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --format=esm --sourcemap),
+    cd: "assets",
+    env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
+  ]
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

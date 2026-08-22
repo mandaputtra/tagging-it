@@ -17,7 +17,7 @@ defmodule TaggingItWeb.Router do
   scope "/", TaggingItWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", LandingLive
 
     # PROTOTYPE — label print flow exploration (#9). Throwaway; delete after verdict.
     get "/prototype/print", PrintPrototypeController, :show

@@ -9685,6 +9685,10 @@ async function putCodes(codes) {
   }
   await tx.done;
 }
+async function listBatches() {
+  const db = await open();
+  return db.getAll("batches");
+}
 async function getBatch(id) {
   const db = await open();
   return db.get("batches", id);
@@ -9721,6 +9725,29 @@ function renderBarcodes(container, toSvg) {
     }
   });
 }
+
+// js/recent_batches.js
+var MAX_RECENT = 6;
+function recentBatchesPayload(batches) {
+  return [...batches].sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at))).slice(0, MAX_RECENT).map((b) => {
+    var _a2;
+    return {
+      id: b.id,
+      name: b.name,
+      updated_at: b.updated_at,
+      code_count: ((_a2 = b.code_ids) != null ? _a2 : []).length
+    };
+  });
+}
+var RecentBatches = {
+  mounted() {
+    listBatches().then((batches) => {
+      this.pushEvent("recent:loaded", { batches: recentBatchesPayload(batches) });
+    }).catch((err) => {
+      console.error("RecentBatches: failed to load batches from store", err);
+    });
+  }
+};
 
 // node_modules/bwip-js/dist/bwipp.mjs
 var $$ = null;
@@ -58870,6 +58897,7 @@ FontLib.loadFont("OCR-B", 96, 100, "AAEAAAAPAIAAAwBwRkZUTXxHn14AADmUAAAAHEdERUYA
 
 // js/app.js
 var Hooks2 = {};
+Hooks2.RecentBatches = RecentBatches;
 Hooks2.BatchCreator = {
   mounted() {
     this.handleEvent("batch:created", async ({ batch, codes }) => {

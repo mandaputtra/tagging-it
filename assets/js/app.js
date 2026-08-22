@@ -5,9 +5,12 @@ import { LiveSocket } from "phoenix_live_view";
 import { getBatch, codesByBatch } from "./batch_store";
 import { persistAndGo } from "./batch_creator";
 import { buildSheetPayload, renderBarcodes } from "./sheet_bridge";
+import { RecentBatches } from "./recent_batches";
 import { toSVG } from "bwip-js/browser";
 
 let Hooks = {};
+
+Hooks.RecentBatches = RecentBatches;
 
 // BatchForm: when the server pushes a created batch, persist it in IndexedDB
 // and navigate to its sheet. Free tier stores everything client-side.

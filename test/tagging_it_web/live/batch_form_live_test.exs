@@ -30,6 +30,21 @@ defmodule TaggingItWeb.BatchFormLiveTest do
       assert "custom_2x1" in options
       assert "custom_50x25" in options
     end
+
+    test "offers the v1 symbology set with QR selectable" do
+      {:ok, _view, html} = live(build_conn(), "/batches/new")
+
+      options = Floki.attribute(find(html, "select[name='batch[symbology]'] option"), "value")
+      assert "code128" in options
+      assert "qrcode" in options
+      assert "code39" in options
+      assert "ean13" in options
+      assert "ean8" in options
+      assert "upca" in options
+      assert "pdf417" in options
+      assert "datamatrix" in options
+      assert "azteccode" in options
+    end
   end
 
   describe "sequence mode" do
@@ -65,6 +80,31 @@ defmodule TaggingItWeb.BatchFormLiveTest do
                "CODEPRODUCT00000220260101",
                "CODEPRODUCT00000320260101"
              ]
+    end
+
+    test "generates QR codes when symbology is qrcode" do
+      {:ok, view, _html} = live(build_conn(), "/batches/new")
+
+      render_submit(view, "create_batch", %{
+        "batch" => %{
+          "name" => "Links",
+          "mode" => "pattern",
+          "prefix" => "URL",
+          "start" => "1",
+          "count" => "2",
+          "date" => "2026-01-01",
+          "label_size" => "avery5160",
+          "symbology" => "qrcode"
+        },
+        "fields" => %{}
+      })
+
+      assert_push_event(view, "batch:created", %{
+        batch: %{"template" => %{"symbology" => "qrcode"}},
+        codes: codes
+      })
+      assert length(codes) == 2
+      assert Enum.all?(codes, &(&1["symbology"] == "qrcode"))
     end
 
     test "rejects an empty prefix" do

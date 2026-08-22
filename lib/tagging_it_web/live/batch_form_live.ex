@@ -26,6 +26,18 @@ defmodule TaggingItWeb.BatchFormLive do
     %{id: "custom_50x25", name: "Custom 50mm × 25mm"}
   ]
 
+  @symbologies [
+    %{id: "qrcode", name: "QR code"},
+    %{id: "code128", name: "Code 128"},
+    %{id: "code39", name: "Code 39"},
+    %{id: "ean13", name: "EAN-13"},
+    %{id: "ean8", name: "EAN-8"},
+    %{id: "upca", name: "UPC-A"},
+    %{id: "pdf417", name: "PDF417"},
+    %{id: "datamatrix", name: "DataMatrix"},
+    %{id: "azteccode", name: "Aztec"}
+  ]
+
   @impl true
   def mount(_params, _session, socket) do
     {:ok,
@@ -38,10 +50,12 @@ defmodule TaggingItWeb.BatchFormLive do
          count: "10",
          date: Date.to_iso8601(Date.utc_today()),
          paste: "",
-         label_size: "avery5160"
+         label_size: "avery5160",
+         symbology: "code128"
        },
        fields: [%Field{name: "", value: ""}],
        label_sizes: @label_sizes,
+       symbologies: @symbologies,
        errors: []
      )}
   end
@@ -99,6 +113,7 @@ defmodule TaggingItWeb.BatchFormLive do
   defp build_template(batch_params, fields_params) do
     name = String.trim(batch_params["name"] || "")
     label_size = batch_params["label_size"] || "avery5160"
+    symbology = batch_params["symbology"] || "code128"
     mode = batch_params["mode"] || "pattern"
 
     fields =
@@ -115,6 +130,7 @@ defmodule TaggingItWeb.BatchFormLive do
       name: name,
       fields: fields,
       strategy: strategy,
+      symbology: symbology,
       label_size: label_size
     }
 

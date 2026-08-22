@@ -173,7 +173,7 @@ defmodule TaggingItWeb.BatchFormLive do
   defp parse_date(str) do
     case Date.from_iso8601(str) do
       {:ok, date} -> date
-      :error -> nil
+      {:error, _reason} -> nil
     end
   end
 end

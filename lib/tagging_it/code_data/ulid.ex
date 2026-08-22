@@ -1,6 +1,6 @@
 defmodule TaggingIt.CodeData.Ulid do
   @moduledoc """
-  ULID generation — 48-bit millisecond timestamp + 80 bits of randomness,
+  ULID generation — 48-bit millisecond timestamp + 82 bits of randomness,
   encoded as 26 chars of Crockford base32 (time-sortable, lexicographically
   ordered). Implemented locally with `:crypto`; no dependency needed.
 
@@ -8,8 +8,6 @@ defmodule TaggingIt.CodeData.Ulid do
   """
 
   @alphabet ~c"0123456789ABCDEFGHJKMNPQRSTVWXYZ"
-  @timestamp_bits 48
-  @random_bits 82
   @total_chars 26
 
   @doc "Generates a fresh ULID string."

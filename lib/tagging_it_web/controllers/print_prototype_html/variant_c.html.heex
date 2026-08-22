@@ -1,0 +1,102 @@
+<!-- PROTOTYPE Variant C — "configurator": edit fields + size, live label preview beside it.
+     Focus: customization loop (what #7 decided — free-form fields, order-only). -->
+<div class="proto-toolbar">
+  <strong>Variant C</strong>
+  <span>Configurator</span>
+  <button type="button" class="print" onclick="window.print()">Print label</button>
+</div>
+
+<div class="proto-stage vc-stage">
+  <div class="vc-config">
+    <h3>Label fields</h3>
+    <div id="vc-fields">
+      <div class="vc-field-row"><input value="CODEPRODUCT" disabled /><input value={@sample["CODEPRODUCT"]} readonly /></div>
+      <div class="vc-field-row"><input value="SKU" /><input value={@sample["SKU"]} /></div>
+      <div class="vc-field-row"><input value="Price" /><input value={@sample["Price"]} /></div>
+      <div class="vc-field-row"><input value="Batch" /><input value={@sample["Batch"]} /></div>
+    </div>
+    <button type="button" id="vc-add">+ add field</button>
+
+    <h3>Label size</h3>
+    <select id="vc-size">
+      <%= for s <- @sizes do %>
+        <option value={s.id} data-w={s.w} data-h={s.h}><%= s.name %></option>
+      <% end %>
+    </select>
+  </div>
+
+  <div class="vc-preview">
+    <div class="proto-sheet vc-sheet">
+      <div class="vc-label" id="vc-label">
+        <div class="vc-barcode" data-bcid="code128" data-text={@sample["CODEPRODUCT"]}></div>
+        <div class="vc-lines" id="vc-lines"></div>
+      </div>
+    </div>
+    <p class="proto-note">Fields stack above the barcode in order (fixed zones + order-only, per #7). Live edit on the left.</p>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var SIZE_LIMIT = 6; // prototype cap on lines that fit
+    var label = document.getElementById("vc-label");
+    var lines = document.getElementById("vc-lines");
+    var fields = document.getElementById("vc-fields");
+
+    function render() {
+      var o = document.getElementById("vc-size").selectedOptions[0];
+      label.style.width = o.dataset.w;
+      label.style.height = o.dataset.h;
+      lines.innerHTML = "";
+      var rows = fields.querySelectorAll(".vc-field-row");
+      rows.forEach(function (row, i) {
+        if (i === 0) return; // barcode data row already rendered as barcode
+        var name = row.querySelector("input:first-child").value || "field" + i;
+        var val = row.querySelector("input:last-child").value || "";
+        var d = document.createElement("div");
+        d.className = "vc-line";
+        d.innerHTML = "<span>" + name.replace(/[<>&]/g, "") + "</span> " + val.replace(/[<>&]/g, "");
+        lines.appendChild(d);
+      });
+    }
+
+    document.getElementById("vc-add").addEventListener("click", function () {
+      var row = document.createElement("div");
+      row.className = "vc-field-row";
+      row.innerHTML = '<input value="Field" /><input value="" />';
+      fields.appendChild(row);
+      render();
+    });
+    document.getElementById("vc-size").addEventListener("change", render);
+    fields.addEventListener("input", render);
+    render();
+  })();
+</script>
+
+<style>
+  .vc-stage { display: flex; gap: 24px; align-items: flex-start; max-width: 900px; margin: 0 auto; }
+  .vc-config { flex: 1; background: #fff; border-radius: 8px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+  .vc-config h3 { margin: 12px 0 8px; font-size: 13px; }
+  .vc-config h3:first-child { margin-top: 0; }
+  .vc-field-row { display: flex; gap: 6px; margin-bottom: 6px; }
+  .vc-field-row input { flex: 1; font-size: 12px; padding: 5px 8px; border: 1px solid #d1d5db; border-radius: 4px; }
+  .vc-field-row input:disabled { background: #f3f4f6; }
+  #vc-add { font-size: 12px; padding: 5px 10px; border: 1px solid #d1d5db; border-radius: 4px; background: #fff; cursor: pointer; }
+  .vc-config select { font-size: 12px; padding: 5px 8px; width: 100%; }
+  .vc-preview { flex: 1; }
+  .vc-sheet { display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .vc-label { box-sizing: border-box; border: 1px dashed #9ca3af; padding: 4px; display: flex; flex-direction: column; justify-content: center; gap: 2px; font-size: 11px; overflow: hidden; }
+  .vc-barcode { text-align: center; }
+  .vc-barcode svg { max-width: 100%; height: auto; }
+  .vc-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vc-line span { font-weight: 700; }
+
+  @page { margin: 0; }
+  @media print {
+    .vc-config { display: none !important; }
+    .vc-stage { display: block; }
+    .vc-preview { margin: 0; }
+    .vc-sheet { padding: 0; border: none; }
+    .vc-label { border: none; }
+  }
+</style>

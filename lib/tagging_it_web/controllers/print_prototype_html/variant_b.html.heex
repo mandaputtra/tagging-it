@@ -1,0 +1,38 @@
+<!-- PROTOTYPE Variant B — "full sheet of labels": Avery-5160-style grid, 30 labels per page,
+     bulk print all. Focus: the sheet, not the single label. -->
+<div class="proto-toolbar">
+  <strong>Variant B</strong>
+  <span>Sheet grid — 30 labels</span>
+  <button type="button" class="print" onclick="window.print()">Print sheet</button>
+</div>
+
+<div class="proto-stage">
+  <div class="proto-sheet vb-sheet">
+    <%= for i <- 1..30 do %>
+      <div class="vb-label">
+        <div class="vb-barcode" data-bcid="code128" data-text={"#{@sample["CODEPRODUCT"]}-#{String.pad_leading(to_string(i), 4, "0")}"}></div>
+        <div class="vb-line"><span>SKU</span> <%= @sample["SKU"] %>-<%= String.pad_leading(to_string(i), 4, "0") %></div>
+        <div class="vb-line"><span>Price</span> <%= @sample["Price"] %></div>
+        <div class="vb-line"><span>Batch</span> <%= @sample["Batch"] %></div>
+      </div>
+    <% end %>
+  </div>
+  <p class="proto-note">Letter sheet, 3 × 10 grid (Avery 5160 geometry). Browser dialog prints the whole sheet — no per-label size setup.</p>
+</div>
+
+<style>
+  .vb-sheet { width: 8.5in; min-height: 11in; margin: 0 auto; box-sizing: border-box; padding: 0.5in 0.3125in; display: flex; flex-wrap: wrap; align-content: flex-start; }
+  .vb-label { width: 2.625in; height: 1in; box-sizing: border-box; padding: 2px 4px; display: flex; flex-direction: column; justify-content: center; gap: 1px; font-size: 9px; break-inside: avoid; border-bottom: 1px dotted #e5e7eb; }
+  .vb-barcode { text-align: center; }
+  .vb-barcode svg { max-width: 100%; height: auto; }
+  .vb-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vb-line span { font-weight: 700; }
+
+  @page { size: 8.5in 11in; margin: 0; }
+  @media print {
+    .proto-stage { padding: 0; }
+    .vb-sheet { margin: 0; border: none; }
+    .vb-label { border: none; }
+  }
+</style>
+

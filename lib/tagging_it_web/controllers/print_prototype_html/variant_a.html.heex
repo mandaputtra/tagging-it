@@ -1,0 +1,57 @@
+<!-- PROTOTYPE Variant A — "single label on its own sheet": one label, size dropdown, print.
+     Focus: minimal, print one label, browser dialog sizes the page. -->
+<div class="proto-toolbar">
+  <strong>Variant A</strong>
+  <span>Single label</span>
+  <select id="va-size">
+    <%= for s <- @sizes do %>
+      <option value={s.id} data-w={s.w} data-h={s.h}><%= s.name %></option>
+    <% end %>
+  </select>
+  <button type="button" class="print" onclick="window.print()">Print label</button>
+</div>
+
+<div class="proto-stage">
+  <div class="proto-sheet va-sheet" id="va-sheet">
+    <div class="va-label" id="va-label">
+      <div class="va-barcode" data-bcid="code128" data-text={@sample["CODEPRODUCT"]}></div>
+      <div class="va-line"><span class="va-name">SKU</span> <%= @sample["SKU"] %></div>
+      <div class="va-line"><span class="va-name">Price</span> <%= @sample["Price"] %></div>
+      <div class="va-line"><span class="va-name">Batch</span> <%= @sample["Batch"] %></div>
+    </div>
+  </div>
+  <p class="proto-note">One label centered on the page. @page size is set to the chosen label size; browser dialog prints it 1:1 (calibrate per printer).</p>
+</div>
+
+<script>
+  (function () {
+    var sel = document.getElementById("va-size");
+    var sheet = document.getElementById("va-sheet");
+    var label = document.getElementById("va-label");
+    function apply() {
+      var o = sel.options[sel.selectedIndex];
+      sheet.style.width = o.dataset.w;
+      sheet.style.height = o.dataset.h;
+      label.style.width = o.dataset.w;
+      label.style.height = o.dataset.h;
+    }
+    sel.addEventListener("change", apply);
+    apply();
+  })();
+</script>
+
+<style>
+  .va-sheet { display: flex; align-items: center; justify-content: center; margin: 0 auto; }
+  .va-label { box-sizing: border-box; border: 1px dashed #9ca3af; padding: 4px; display: flex; flex-direction: column; justify-content: center; gap: 2px; font-size: 11px; overflow: hidden; }
+  .va-barcode { text-align: center; }
+  .va-barcode svg { max-width: 100%; height: auto; }
+  .va-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .va-name { font-weight: 700; }
+
+  @page { margin: 0; }
+  @media print {
+    .proto-stage { padding: 0; }
+    .va-sheet { margin: 0; border: none; }
+    .va-label { border: none; }
+  }
+</style>

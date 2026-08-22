@@ -18,6 +18,9 @@ defmodule TaggingItWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+
+    # PROTOTYPE — label print flow exploration (#9). Throwaway; delete after verdict.
+    get "/prototype/print", PrintPrototypeController, :show
   end
 
   # Other scopes may use custom stacks.

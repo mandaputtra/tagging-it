@@ -1,0 +1,117 @@
+<!-- PROTOTYPE (#9): label print flow. Three radically different variants, ?variant=A|B|C. Throwaway. -->
+<div id="proto">
+  <%= if @variant == "A" do %>
+    <%= raw(@variant_a) %>
+  <% end %>
+  <%= if @variant == "B" do %>
+    <%= raw(@variant_b) %>
+  <% end %>
+  <%= if @variant == "C" do %>
+    <%= raw(@variant_c) %>
+  <% end %>
+
+  <div class="proto-switcher" aria-label="Prototype variant switcher">
+    <button type="button" onclick="__protoVariant.prev()" aria-label="Previous variant">‹</button>
+    <span class="lbl">Variant {@variant}</span>
+    <button type="button" onclick="__protoVariant.next()" aria-label="Next variant">›</button>
+  </div>
+</div>
+
+<script>
+  // PROTOTYPE — bwip-js CDN (the library #2 recommended). Throwaway.
+  window.__renderBarcode = function (el, opts) {
+    if (typeof bwipjs === "undefined") return;
+    var svg = bwipjs.toSVG(Object.assign({
+      bcid: opts.bcid || "code128",
+      text: opts.text,
+      scale: opts.scale || 3,
+      includetext: opts.includetext || false,
+      textxalign: "center",
+      height: opts.height || 12
+    }, opts.extra || {}));
+    el.innerHTML = svg;
+    el.style.visibility = "visible";
+  };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script>
+<script>
+  // PROTOTYPE — render all barcode placeholders once bwip-js is loaded.
+  (function () {
+    function renderAll() {
+      document.querySelectorAll("[data-bcid]").forEach(function (el) {
+        if (el.dataset.rendered) return;
+        try {
+          window.__renderBarcode(el, { bcid: el.dataset.bcid, text: el.dataset.text });
+          el.dataset.rendered = "1";
+        } catch (e) {
+          el.textContent = "barcode error: " + e.message;
+        }
+      });
+    }
+    if (typeof bwipjs !== "undefined") { renderAll(); }
+    else { window.addEventListener("load", function () { renderAll(); }); }
+    // variant C live re-render of barcode when code data changes
+    document.addEventListener("input", function (e) {
+      var row = e.target.closest(".vc-field-row");
+      if (row && row.querySelector("input:first-child").disabled) {
+        var bc = document.querySelector(".vc-barcode");
+        if (bc) { bc.dataset.rendered = ""; bc.innerHTML = ""; bc.dataset.text = e.target.value || " "; window.__renderBarcode(bc, { bcid: "code128", text: e.target.value || " " }); bc.dataset.rendered = "1"; }
+      }
+    });
+  })();
+</script>
+<script>
+  // PROTOTYPE — variant switcher (floating bar + URL param). Throwaway.
+  (function () {
+    var KEYS = ["A", "B", "C"];
+    function current() {
+      return new URLSearchParams(window.location.search).get("variant") || "A";
+    }
+    function go(v) {
+      var url = new URL(window.location.href);
+      url.searchParams.set("variant", v);
+      window.location.href = url.toString();
+    }
+    window.__protoVariant = {
+      go: go,
+      current: current,
+      prev: function () {
+        var i = KEYS.indexOf(current());
+        go(KEYS[(i + 2) % KEYS.length]);
+      },
+      next: function () {
+        var i = KEYS.indexOf(current());
+        go(KEYS[(i + 1) % KEYS.length]);
+      }
+    };
+    document.addEventListener("keydown", function (e) {
+      if (e.target.matches("input, textarea, [contenteditable]")) return;
+      var i = KEYS.indexOf(current());
+      if (e.key === "ArrowRight") { e.preventDefault(); go(KEYS[(i + 1) % KEYS.length]); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); go(KEYS[(i + 2) % KEYS.length]); }
+    });
+  })();
+</script>
+
+<style>
+  /* PROTOTYPE styles — throwaway, not app CSS */
+  body { font-family: system-ui, -apple-system, sans-serif; margin: 0; background: #f3f4f6; }
+  .proto-toolbar { position: fixed; top: 0; left: 0; right: 0; background: #111827; color: #fff; padding: 8px 16px; display: flex; gap: 12px; align-items: center; font-size: 13px; z-index: 50; }
+  .proto-toolbar select, .proto-toolbar button { font-size: 13px; padding: 4px 8px; border-radius: 4px; border: 1px solid #374151; background: #1f2937; color: #fff; }
+  .proto-toolbar button.print { background: #2563eb; border-color: #2563eb; font-weight: 600; }
+  .proto-stage { margin-top: 56px; padding: 24px; }
+  .proto-sheet { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+  .proto-note { font-size: 12px; color: #6b7280; margin-top: 8px; }
+
+  /* floating switcher */
+  .proto-switcher { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: #111827; color: #fff; border-radius: 999px; padding: 6px 10px; display: flex; gap: 10px; align-items: center; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,.3); z-index: 100; }
+  .proto-switcher button { background: #374151; border: none; color: #fff; border-radius: 999px; width: 28px; height: 28px; cursor: pointer; font-size: 14px; }
+  .proto-switcher .lbl { min-width: 130px; text-align: center; }
+
+  @media print {
+    .proto-toolbar, .proto-switcher, .proto-note { display: none !important; }
+    .proto-stage { margin: 0; padding: 0; background: none; }
+    body { background: #fff; }
+    .proto-sheet { box-shadow: none; }
+  }
+</style>

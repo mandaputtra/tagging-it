@@ -28,3 +28,4 @@ tagging_it-*.tar
 
 # Node modules (assets/)
 /assets/node_modules/
+dbeaver-mcp.log

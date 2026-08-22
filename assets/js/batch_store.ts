@@ -1,14 +1,21 @@
-import { openDB } from "idb";
+import { openDB, type IDBPDatabase } from "idb";
+import type { BatchRecord, CodeRecord } from "./types.js";
 
 const DB_NAME = "tagging-it";
 const DB_VERSION = 1;
 
-// Module-level singleton: open() is idempotent and reusable across calls.
-let dbPromise = null;
+interface TaggingItSchema {
+  batches: { key: string; value: BatchRecord };
+  codes: { key: string; value: CodeRecord; indexes: { batchId: string } };
+  meta: { key: string; value: { key: string; value: unknown } };
+}
 
-export function open() {
+// Module-level singleton: open() is idempotent and reusable across calls.
+let dbPromise: Promise<IDBPDatabase<TaggingItSchema>> | null = null;
+
+export function open(): Promise<IDBPDatabase<TaggingItSchema>> {
   if (!dbPromise) {
-    dbPromise = openDB(DB_NAME, DB_VERSION, {
+    dbPromise = openDB<TaggingItSchema>(DB_NAME, DB_VERSION, {
       upgrade(db) {
         if (!db.objectStoreNames.contains("batches")) {
           db.createObjectStore("batches", { keyPath: "id" });
@@ -26,12 +33,12 @@ export function open() {
   return dbPromise;
 }
 
-export async function putBatch(batch) {
+export async function putBatch(batch: BatchRecord): Promise<void> {
   const db = await open();
   await db.put("batches", batch);
 }
 
-export async function putCodes(codes) {
+export async function putCodes(codes: CodeRecord[]): Promise<void> {
   const db = await open();
   const tx = db.transaction("codes", "readwrite");
   for (const code of codes) {
@@ -40,27 +47,27 @@ export async function putCodes(codes) {
   await tx.done;
 }
 
-export async function listBatches() {
+export async function listBatches(): Promise<BatchRecord[]> {
   const db = await open();
   return db.getAll("batches");
 }
 
-export async function getBatch(id) {
+export async function getBatch(id: string): Promise<BatchRecord | undefined> {
   const db = await open();
   return db.get("batches", id);
 }
 
-export async function codesByBatch(batchId) {
+export async function codesByBatch(batchId: string): Promise<CodeRecord[]> {
   const db = await open();
   return db.getAllFromIndex("codes", "batchId", batchId);
 }
 
-export async function listCodes() {
+export async function listCodes(): Promise<CodeRecord[]> {
   const db = await open();
   return db.getAll("codes");
 }
 
-export async function deleteBatch(id) {
+export async function deleteBatch(id: string): Promise<void> {
   const db = await open();
   const tx = db.transaction(["batches", "codes"], "readwrite");
   const codeIds = await tx.objectStore("codes").index("batchId").getAllKeys(id);
@@ -71,12 +78,12 @@ export async function deleteBatch(id) {
   await tx.done;
 }
 
-export async function putMeta(key, value) {
+export async function putMeta(key: string, value: unknown): Promise<void> {
   const db = await open();
   await db.put("meta", { key, value });
 }
 
-export async function getMeta(key) {
+export async function getMeta(key: string): Promise<unknown> {
   const db = await open();
   const row = await db.get("meta", key);
   return row ? row.value : undefined;

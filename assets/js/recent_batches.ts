@@ -2,12 +2,14 @@
 // (client-side store), maps them to a compact wire payload, and pushes it to
 // LandingLive for server-side rendering. Free tier: data never leaves the
 // browser.
+import type { Hook } from "phoenix_live_view";
 import { listBatches } from "./batch_store.js";
+import type { BatchRecord, RecentBatchWire } from "./types.js";
 
 const MAX_RECENT = 6;
 
 /** Maps stored batches to the payload LandingLive renders. Pure, testable. */
-export function recentBatchesPayload(batches) {
+export function recentBatchesPayload(batches: BatchRecord[]): RecentBatchWire[] {
   return [...batches]
     .sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at)))
     .slice(0, MAX_RECENT)
@@ -20,7 +22,7 @@ export function recentBatchesPayload(batches) {
 }
 
 /** LiveView hook: on mount, load recent batches from IndexedDB and push them. */
-export const RecentBatches = {
+export const RecentBatches: Hook = {
   mounted() {
     listBatches()
       .then((batches) => {

@@ -1,6 +1,7 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it } from "vitest";
 import * as store from "../js/batch_store.js";
+import { makeBatch, makeCode } from "./fixtures.js";
 
 // fake-indexeddb persists the database at the global level across tests, so
 // wipe every store before each test.
@@ -8,38 +9,6 @@ beforeEach(async () => {
   const db = await store.open();
   await Promise.all(["batches", "codes", "meta"].map((name) => db.clear(name)));
 });
-
-const now = () => new Date().toISOString();
-
-function makeBatch(id = "b1", name = "Batch One") {
-  return {
-    id,
-    name,
-    template: {
-      name,
-      fields: [{ name: "item", value: "widget" }],
-      strategy: { type: "pattern", prefix: "ITM", start: 1, count: 2, date: "2026-08-22" },
-      symbology: "qr",
-    },
-    code_ids: ["c1", "c2"],
-    created_at: now(),
-    updated_at: now(),
-    dirty: true,
-  };
-}
-
-function makeCode(id, batchId, codeData) {
-  return {
-    id,
-    batch_id: batchId,
-    code_data: codeData,
-    symbology: "qr",
-    fields: [{ name: "item", value: "widget" }],
-    created_at: now(),
-    updated_at: now(),
-    dirty: true,
-  };
-}
 
 describe("batch_store", () => {
   it("putBatch/getBatch round-trips a batch", async () => {

@@ -1,38 +1,11 @@
 // @vitest-environment happy-dom
 import "fake-indexeddb/auto";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { deleteBatchAndRefresh } from "../js/batch_creator.js";
-import { putBatch, putCodes, getBatch, listBatches } from "../js/batch_store.js";
-
-const now = () => new Date().toISOString();
-
-function makeBatch(id, name) {
-  return {
-    id,
-    name,
-    template: { name, fields: [], strategy: { type: "ulid" }, symbology: "code128", label_size: "avery5160" },
-    code_ids: [id + "-c1"],
-    created_at: now(),
-    updated_at: now(),
-    dirty: true,
-  };
-}
-
-function makeCode(id, batchId, data) {
-  return {
-    id,
-    batch_id: batchId,
-    code_data: data,
-    symbology: "code128",
-    fields: [],
-    created_at: now(),
-    updated_at: now(),
-    dirty: true,
-  };
-}
+import { putBatch, putCodes, getBatch, open } from "../js/batch_store.js";
+import { makeBatch, makeCode } from "./fixtures.js";
 
 beforeEach(async () => {
-  const { open } = await import("../js/batch_store.js");
   const db = await open();
   await Promise.all(["batches", "codes", "meta"].map((name) => db.clear(name)));
 });
@@ -59,6 +32,6 @@ describe("deleteBatchAndRefresh", () => {
   });
 
   it("rejects when the batch id is missing", async () => {
-    await expect(deleteBatchAndRefresh()).rejects.toThrow(/batch/i);
+    await expect(deleteBatchAndRefresh("")).rejects.toThrow(/batch/i);
   });
 });

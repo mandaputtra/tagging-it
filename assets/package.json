@@ -3,10 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "vitest run",
+    "test": "tsc --noEmit && vitest run",
+    "typecheck": "tsc --noEmit",
     "css": "tailwindcss -i css/app.css -o ../priv/static/assets/app.css --minify",
     "css:watch": "tailwindcss -i css/app.css -o ../priv/static/assets/app.css --watch",
-    "build": "npm run css && esbuild js/app.js --bundle --outdir=../priv/static/assets --target=es2017 --format=esm --sourcemap",
+    "build": "tsc --noEmit && npm run css && esbuild js/app.ts --bundle --outdir=../priv/static/assets --target=es2017 --format=esm --sourcemap",
     "deploy": "npm run build"
   },
   "dependencies": {
@@ -22,6 +23,7 @@
     "fake-indexeddb": "^6.2.5",
     "happy-dom": "^20.11.6",
     "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
     "vitest": "^4.1.11"
   }
 }

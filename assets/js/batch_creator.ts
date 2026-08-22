@@ -2,14 +2,13 @@
 // from BatchFormLive, persists batch + codes in IndexedDB, and navigates to
 // the sheet. Free tier never sends this data to the server.
 import { putBatch, putCodes, deleteBatch, listBatches } from "./batch_store.js";
+import type { BatchRecord, CodeRecord } from "./types.js";
 
 /**
  * Deletes a batch (cascade: codes too) from IndexedDB and returns the
  * remaining batches for the landing list re-render.
- * @param {string} batchId
- * @returns {Promise<Array<object>>} remaining stored batches
  */
-export async function deleteBatchAndRefresh(batchId) {
+export async function deleteBatchAndRefresh(batchId: string): Promise<BatchRecord[]> {
   if (!batchId) throw new Error("deleteBatchAndRefresh: missing batch id");
 
   await deleteBatch(batchId);
@@ -18,11 +17,8 @@ export async function deleteBatchAndRefresh(batchId) {
 
 /**
  * Persists a created batch + codes and navigates to its sheet.
- * @param {object} batch - wire batch (from the `batch:created` push)
- * @param {Array<object>} codes - wire codes
- * @returns {Promise<void>}
  */
-export async function persistAndGo(batch, codes) {
+export async function persistAndGo(batch: BatchRecord, codes: CodeRecord[]): Promise<void> {
   if (!batch?.id) throw new Error("persistAndGo: missing batch");
   if (!Array.isArray(codes)) throw new Error("persistAndGo: codes must be a list");
 

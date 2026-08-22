@@ -1,14 +1,21 @@
-// Client entry — LiveView socket + SheetView bridge.
+// Client entry — LiveSocket + SheetView bridge.
 // Built with esbuild: `npm run build` in assets/ → priv/static/assets/app.js.
 import { Socket } from "phoenix";
-import { LiveSocket } from "phoenix_live_view";
-import { getBatch, codesByBatch } from "./batch_store";
-import { persistAndGo, deleteBatchAndRefresh } from "./batch_creator";
-import { buildSheetPayload, renderBarcodes } from "./sheet_bridge";
-import { RecentBatches, recentBatchesPayload } from "./recent_batches";
+import { LiveSocket, type Hook } from "phoenix_live_view";
+import { getBatch, codesByBatch } from "./batch_store.js";
+import { persistAndGo, deleteBatchAndRefresh } from "./batch_creator.js";
+import { buildSheetPayload, renderBarcodes } from "./sheet_bridge.js";
+import { RecentBatches, recentBatchesPayload } from "./recent_batches.js";
 import { toSVG } from "bwip-js/browser";
+import type { BatchCreatedWire } from "./types.js";
 
-let Hooks = {};
+declare global {
+  interface Window {
+    liveSocket: LiveSocket;
+  }
+}
+
+const Hooks: Record<string, Hook> = {};
 
 Hooks.RecentBatches = RecentBatches;
 
@@ -16,7 +23,7 @@ Hooks.RecentBatches = RecentBatches;
 // push the refreshed list back to the server for re-render.
 Hooks.BatchDelete = {
   mounted() {
-    this.el.addEventListener("click", async (ev) => {
+    this.el.addEventListener("click", async (ev: Event) => {
       ev.preventDefault();
       const id = this.el.dataset.batchId;
       if (!id) return;
@@ -34,7 +41,7 @@ Hooks.BatchDelete = {
 // Sheet toolbar: delete the batch and return to the landing page.
 Hooks.SheetDelete = {
   mounted() {
-    this.el.addEventListener("click", async (ev) => {
+    this.el.addEventListener("click", async (ev: Event) => {
       ev.preventDefault();
       const id = this.el.dataset.batchId;
       if (!id) return;
@@ -53,7 +60,7 @@ Hooks.SheetDelete = {
 // and navigate to its sheet. Free tier stores everything client-side.
 Hooks.BatchCreator = {
   mounted() {
-    this.handleEvent("batch:created", async ({ batch, codes }) => {
+    this.handleEvent("batch:created", async ({ batch, codes }: BatchCreatedWire) => {
       try {
         await persistAndGo(batch, codes);
       } catch (err) {

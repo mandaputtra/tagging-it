@@ -58918,14 +58918,6 @@ FontLib.loadFont("OCR-B", 96, 100, "AAEAAAAPAIAAAwBwRkZUTXxHn14AADmUAAAAHEdERUYA
 // js/app.ts
 var Hooks2 = {};
 Hooks2.RecentBatches = RecentBatches;
-Hooks2.SymbologyGallery = {
-  mounted() {
-    renderBarcodes(this.el, (opts) => ToSVG(opts));
-  },
-  updated() {
-    renderBarcodes(this.el, (opts) => ToSVG(opts));
-  }
-};
 Hooks2.BatchDelete = {
   mounted() {
     this.el.addEventListener("click", async (ev) => {

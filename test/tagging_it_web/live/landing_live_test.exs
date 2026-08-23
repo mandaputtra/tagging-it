@@ -3,39 +3,25 @@ defmodule TaggingItWeb.LandingLiveTest do
 
   import Phoenix.LiveViewTest
 
-  test "landing renders the hero and a symbology gallery of all 9 formats" do
+  test "landing renders the sticker hero and CTA into the batch creator" do
     {:ok, _view, html} = live(build_conn(), "/")
 
-    assert text(html) =~ "Tagging It"
-    assert text(html) =~ "Make a label for anything"
-    assert length(find(html, ".gallery-card")) == 9
+    assert text(html) =~ "TaggingIt"
+    assert text(html) =~ "Create a barcode/QR, Print, Label, Verify"
+    assert text(html) =~ "Create batch"
+    assert text(html) =~ "Free · Private · In your browser"
+    assert find(html, "a[href='/batches/new']") != []
+  end
 
-    # each card links to the batch creator with its symbology preselected
-    for {sym, href} <- [
-          {"QR Code", "/batches/new?symbology=qrcode"},
-          {"Code 128", "/batches/new?symbology=code128"},
-          {"Code 39", "/batches/new?symbology=code39"},
-          {"EAN-13", "/batches/new?symbology=ean13"},
-          {"EAN-8", "/batches/new?symbology=ean8"},
-          {"UPC-A", "/batches/new?symbology=upca"},
-          {"PDF417", "/batches/new?symbology=pdf417"},
-          {"DataMatrix", "/batches/new?symbology=datamatrix"},
-          {"Aztec", "/batches/new?symbology=azteccode"}
-        ] do
-      card = find(html, ".gallery-card") |> Enum.find(&(text(&1) =~ sym))
-      assert card != nil, "missing gallery card for #{sym}"
-      assert find(card, "a[href='#{href}']") != []
+  test "hero shows the four step tiles Create, Print, Label, Verify" do
+    {:ok, _view, html} = live(build_conn(), "/")
+
+    for step <- ["Create", "Print", "Label", "Verify"] do
+      assert text(html) =~ step
     end
   end
 
-  test "gallery cards carry barcode placeholders for live bwip-js rendering" do
-    {:ok, _view, html} = live(build_conn(), "/")
-
-    assert length(find(html, ".gallery-card .barcode[data-bcid]")) == 9
-    assert find(html, "div[phx-hook='SymbologyGallery']") != []
-  end
-
-  test "recent batches arrive from the client and render rows in the gallery section" do
+  test "recent batches render as sticker cards with count chip and date" do
     {:ok, view, _html} = live(build_conn(), "/")
 
     view
@@ -59,13 +45,14 @@ defmodule TaggingItWeb.LandingLiveTest do
     })
 
     html = render(view)
+
     assert find(html, "#recent-batches") != []
     assert text(html) =~ "Warehouse shelf labels"
-    assert text(html) =~ "(30)"
-    assert text(html) =~ "Code 128"
+    assert text(html) =~ "Code 128 · 30 labels"
+    assert text(html) =~ "30 labels"
     assert text(html) =~ "WiFi guest cards"
-    assert text(html) =~ "(12)"
-    assert text(html) =~ "QR Code"
+    assert text(html) =~ "QR Code · 12 labels"
+    assert text(html) =~ "Aug 20"
     assert find(html, "a[href='/sheet/b-1']") != []
     assert find(html, "a[href='/sheet/b-2']") != []
   end
@@ -75,17 +62,9 @@ defmodule TaggingItWeb.LandingLiveTest do
 
     assert find(html, "#recent-batches") != []
     assert text(html) =~ "No batches yet"
-    refute find(html, ".recent-row") != []
   end
 
-  test "bulk mode is a link, not an embedded form" do
-    {:ok, _view, html} = live(build_conn(), "/")
-
-    refute find(html, "#batch-form") != []
-    assert find(html, "a[href='/batches/new']") != []
-  end
-
-    defp find(html, selector) when is_binary(html) do
+  defp find(html, selector) when is_binary(html) do
     html |> to_string() |> Floki.parse_fragment!() |> Floki.find(selector)
   end
 

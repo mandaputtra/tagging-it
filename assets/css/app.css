@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @source "../../lib";
 @source "../../deps/phoenix_live_view/lib";
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&family=Fredoka:wght@300..700&display=swap");
 
 /*
  * Tagging It theme — tokens from docs/notion-DESIGN.md
@@ -67,6 +68,21 @@
 
   /* Type — Notion Sans (Inter-based) fallback chain */
   --font-sans: "Inter", -apple-system, "Segoe UI", Helvetica, system-ui, sans-serif;
+  /* Sticker theme — pen.dev home design (playful label-maker identity) */
+  --font-display: "Baloo 2", "Fredoka", system-ui, sans-serif;
+  --font-body: "Fredoka", system-ui, sans-serif;
+  --color-sticker-cream: #fff8ec;
+  --color-sticker-ink: #2b2a3d;
+  --color-sticker-muted: #6e6a7e;
+  --color-sticker-yellow: #ffd23f;
+  --color-sticker-coral: #ff6b5e;
+  --color-sticker-sky: #6bc5ff;
+  --color-sticker-pink: #ff8fc7;
+  --color-sticker-teal: #2ec4b6;
+  --color-sticker-grape: #8e7bff;
+  --shadow-sticker: 5px 5px 0 0 #2b2a3d;
+  --shadow-sticker-soft: 5px 5px 0 0 rgb(43 42 61 / 0.15);
+  --shadow-sticker-card: 5px 5px 0 0 rgb(43 42 61 / 0.1);
 
   /* Geometry — sober editorial */
   --radius-xs: 4px;

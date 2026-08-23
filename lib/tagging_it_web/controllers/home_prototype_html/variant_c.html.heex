@@ -1,0 +1,84 @@
+<!-- PROTOTYPE (#15) Variant C — "Create-first": symbology chips on top, creator form below, live barcode. Batch form absorbed into this page. -->
+<div class="hp hp-c">
+  <header class="hp-c-top">
+    <h1>Make a label.</h1>
+    <a href="#" onclick="return false">Bulk batch mode →</a> <em>(stub)</em>
+  </header>
+
+  <nav class="hp-chips" id="hp-chips">
+    <%= for {sym, i} <- Enum.with_index(@symbologies) do %>
+      <button type="button" class={"hp-chip" <> if(i == 0, do: " active", else: "")}
+              data-format={sym.bcid} data-sample={sym.sample}
+              onclick="__homeC.pick(this)">
+        {sym.name}
+      </button>
+    <% end %>
+  </nav>
+
+  <main class="hp-c-main">
+    <section class="hp-c-preview">
+      <div class="hp-c-bar-wrap"><div id="hp-c-bar"></div></div>
+      <div class="hp-note" id="hp-c-symname">QR Code</div>
+    </section>
+
+    <section class="hp-c-form">
+      <label>Value
+        <input id="hp-c-value" value="https://tagging.it/r/DEMO-001"
+               placeholder="What should the code encode?"
+               oninput="__homeC.rerender()">
+      </label>
+      <div class="hp-row">
+        <label>Kind
+          <select id="hp-c-kind">
+            <option>Link</option>
+            <option>Sequence</option>
+          </select>
+        </label>
+        <label>Sequence (optional)
+          <input placeholder="e.g. SN-0001…SN-0099 (stub)">
+        </label>
+      </div>
+      <fieldset>
+        <legend>Detail fields</legend>
+        <div class="hp-field-row"><input placeholder="Field name" value="SKU"><input placeholder="Value" value="SKU-2041-B"></div>
+        <button type="button" onclick="__homeC.addField()">+ Add field</button> <em>(stub)</em>
+      </fieldset>
+      <p class="hp-note">Create = stub. Recent batches would live below this form (browser store).</p>
+    </section>
+  </main>
+
+  <footer class="hp-foot">
+    <span><strong>Recent batches</strong>: B-2208 · 30 labels — SKU-2041-B | B-2207 · 12 labels — WiFi guest</span>
+  </footer>
+</div>
+
+<script>
+  // PROTOTYPE variant C — chip picker + live re-render.
+  window.__homeC = {
+    bcid: "qrcode",
+    pick: function (chip) {
+      document.querySelectorAll(".hp-chip.active").forEach(function (c) { c.classList.remove("active"); });
+      chip.classList.add("active");
+      __homeC.bcid = chip.dataset.format;
+      document.getElementById("hp-c-value").value = chip.dataset.sample;
+      document.getElementById("hp-c-symname").textContent = chip.textContent;
+      __homeC.rerender();
+    },
+    rerender: function () {
+      var el = document.getElementById("hp-c-bar");
+      var v = document.getElementById("hp-c-value").value || " ";
+      el.innerHTML = "";
+      try {
+        window.__renderBarcode(el, { bcid: __homeC.bcid, text: v, scale: 3, includetext: true });
+      } catch (e) {
+        el.innerHTML = "<em style='color:#b91c1c'>Invalid for " + __homeC.bcid + ": " + e.message + "</em>";
+      }
+    },
+    addField: function () {
+      var row = document.createElement("div");
+      row.className = "hp-field-row";
+      row.innerHTML = "<input placeholder='Field name'><input placeholder='Value'>";
+      document.querySelector(".hp-c-form fieldset").insertBefore(row, document.querySelector(".hp-c-form fieldset button"));
+    }
+  };
+</script>

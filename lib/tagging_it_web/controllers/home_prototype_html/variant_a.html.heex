@@ -1,0 +1,56 @@
+<!-- PROTOTYPE (#15) Variant A — "Gallery grid": navy hero + 9 symbology cards with live examples. -->
+<div class="hp hp-a">
+  <header class="hp-hero">
+    <h1>Make a label for anything.</h1>
+    <p>Pick a barcode or QR format to get started. Not sure? Browse the examples.</p>
+  </header>
+
+  <main class="hp-grid">
+    <%= for sym <- @symbologies do %>
+      <button type="button" class="hp-card"
+              style={"background:" <> sym.tint}
+              onclick="__homeA.pick(this)">
+        <span class="hp-card-name">{sym.name}</span>
+        <span class="hp-card-bar" data-bcid={sym.bcid} data-text={sym.sample}></span>
+        <span class="hp-card-blurb">{sym.blurb}</span>
+      </button>
+    <% end %>
+  </main>
+  <section class="hp-recent">
+    <h2>Recent batches</h2>
+    <ul>
+      <%= for b <- [
+        %{title: "Warehouse shelf labels", count: 30, sym: "Code 128", date: "Aug 20, 2026"},
+        %{title: "WiFi guest cards", count: 12, sym: "QR Code", date: "Aug 18, 2026"},
+        %{title: "Product relabel — EU", count: 64, sym: "EAN-13", date: "Aug 11, 2026"}
+      ] do %>
+        <li class="hp-batch-row">
+          <strong>{b.title}</strong> <span class="hp-count">({b.count})</span>
+          <span class="hp-sep">—</span> {b.sym}
+          <span class="hp-date">({b.date})</span>
+        </li>
+      <% end %>
+    </ul>
+    <p class="hp-note">Reads from your browser store in the real app. <a href="#" onclick="return false">Bulk batch mode →</a> <em>(stub)</em></p>
+  </section>
+
+  <div class="hp-chosen" id="hp-a-chosen" hidden>
+    You picked <strong id="hp-a-chosen-name"></strong>. Next: enter your value, add detail fields, print.
+    <a href="#" onclick="return false">Continue →</a> <em>(stub)</em>
+  </div>
+
+</div>
+
+<script>
+  // PROTOTYPE variant A — pick feedback only.
+  window.__homeA = {
+    pick: function (card) {
+      document.querySelectorAll(".hp-card.picked").forEach(function (c) { c.classList.remove("picked"); });
+      card.classList.add("picked");
+      var bar = document.getElementById("hp-a-chosen");
+      bar.hidden = false;
+      document.getElementById("hp-a-chosen-name").textContent =
+        card.querySelector(".hp-card-name").textContent;
+    }
+  };
+</script>

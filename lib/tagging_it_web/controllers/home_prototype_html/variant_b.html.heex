@@ -1,0 +1,95 @@
+<!-- PROTOTYPE (#15) Variant B — "One-by-one showcase": full-screen single symbology, browse with arrows, CTA reveals step 2. -->
+<div class="hp hp-b">
+  <header class="hp-b-top">
+    <span class="hp-b-brand">Tagging It</span>
+    <a href="#" onclick="return false">Bulk batch mode →</a> <em>(stub)</em>
+  </header>
+
+  <main class="hp-b-stage">
+    <div class="hp-b-count" id="hp-b-count">1 / 9</div>
+
+    <%= for {sym, i} <- Enum.with_index(@symbologies) do %>
+      <section class={"hp-b-slide" <> if(i == 0, do: " active", else: "")} data-sym={sym.bcid}>
+        <h1>{sym.name}</h1>
+        <p class="hp-b-blurb">{sym.blurb}</p>
+        <div class="hp-b-bar" data-bcid={sym.bcid} data-text={sym.sample}></div>
+      </section>
+    <% end %>
+
+    <div class="hp-b-dots" id="hp-b-dots"></div>
+
+    <button type="button" class="hp-b-cta hp-purple" onclick="__homeB.use()">Use this format →</button>
+  </main>
+
+  <nav class="hp-b-arrows">
+    <button type="button" onclick="__homeB.go(-1)" aria-label="Previous format">‹</button>
+    <button type="button" onclick="__homeB.go(1)" aria-label="Next format">›</button>
+  </nav>
+
+  <!-- Step 2 stub — what happens after choosing. -->
+  <aside class="hp-b-next" id="hp-b-next" hidden>
+    <h2>Create with <span id="hp-b-next-name"></span></h2>
+    <label>Your value
+      <input id="hp-b-value" value="" placeholder="Type to see it encoded live…"
+             oninput="__homeB.rerender()">
+    </label>
+    <p class="hp-note">Step 3+ (fields, sequence, print) = stubs. The question here is only: does one-at-a-time browsing feel right?</p>
+    <button type="button" onclick="this.closest('.hp-b-next').hidden = true">Back to browsing</button>
+  </aside>
+</div>
+
+<script>
+  // PROTOTYPE variant B — one-by-one carousel.
+  window.__homeB = (function () {
+    var slides = document.querySelectorAll(".hp-b-slide");
+    var names = [];
+    slides.forEach(function (s) { names.push(s.getAttribute("data-sym")); });
+    var i = 0;
+    function draw() {
+      slides.forEach(function (s, n) { s.classList.toggle("active", n === i); });
+      document.getElementById("hp-b-count").textContent = (i + 1) + " / " + slides.length;
+      var dots = "";
+      for (var k = 0; k < slides.length; k++) dots += "<span class='" + (k === i ? "on" : "") + "'>●</span>";
+      document.getElementById("hp-b-dots").innerHTML = dots;
+    }
+    function renderSlide() {
+      var s = slides[i], bar = s.querySelector(".hp-b-bar");
+      bar.dataset.rendered = ""; bar.innerHTML = "";
+      window.__renderBarcode(bar, { bcid: bar.dataset.bcid, text: bar.dataset.text });
+      bar.dataset.rendered = "1";
+    }
+    function renderAll() {
+      // Render lazily: current slide first; others on demand.
+      renderSlide();
+    }
+    return {
+      go: function (d) { i = (i + d + slides.length) % slides.length; draw(); renderAll(); },
+      use: function () {
+        var panel = document.getElementById("hp-b-next");
+        panel.hidden = false;
+        document.getElementById("hp-b-next-name").textContent = slides[i].querySelector("h1").textContent;
+        var inp = document.getElementById("hp-b-value");
+        inp.value = slides[i].querySelector(".hp-b-bar").dataset.text;
+        __homeB.rerender();
+      },
+      rerender: function () {
+        var panel = document.querySelector("#hp-b-next .live-bar") ||
+          (function () {
+            var d = document.createElement("div"); d.className = "live-bar";
+            d.style.cssText = "background:#fff;padding:8px;margin-top:8px;";
+            document.getElementById("hp-b-value").after(d); return d;
+          })();
+        var v = document.getElementById("hp-b-value").value || " ";
+        var bcid = names[i];
+        try { window.__renderBarcode(panel, { bcid: bcid, text: v }); } catch (e) { panel.textContent = "invalid for " + bcid + ": " + e.message; }
+      },
+      init: function () { draw(); }
+    };
+  })();
+  document.addEventListener("keydown", function (e) {
+    if (e.target.matches("input, textarea")) return;
+    if (!document.querySelector(".hp-b") || document.querySelector(".hp-b").offsetParent === null) return;
+    if (e.key === "ArrowRight") __homeB.go(1);
+    if (e.key === "ArrowLeft") __homeB.go(-1);
+  });
+</script>

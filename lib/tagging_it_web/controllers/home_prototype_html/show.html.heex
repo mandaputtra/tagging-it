@@ -1,0 +1,172 @@
+<!-- PROTOTYPE (#15): symbology-first home. Three radically different variants, ?variant=A|B|C. Throwaway. -->
+<div id="proto">
+  <%= if @variant == "A" do %>
+    <%= raw(@variant_a) %>
+  <% end %>
+  <%= if @variant == "B" do %>
+    <%= raw(@variant_b) %>
+  <% end %>
+  <%= if @variant == "C" do %>
+    <%= raw(@variant_c) %>
+  <% end %>
+  <div class="hproto-switcher" aria-label="Prototype variant switcher">
+    <span class="lbl">{@variant} — {%{"A" => "Grid gallery", "B" => "One-by-one showcase", "C" => "Create-first"}[@variant]}</span>
+    <button type="button" onclick="__homeProto.prev()" aria-label="Previous variant">‹</button>
+    <button type="button" onclick="__homeProto.next()" aria-label="Next variant">›</button>
+  </div>
+</div>
+
+<script>
+  // PROTOTYPE — bwip-js CDN (the library #2 recommended). Throwaway.
+  window.__renderBarcode = function (el, opts) {
+    if (typeof bwipjs === "undefined") return;
+    var svg = bwipjs.toSVG(Object.assign({
+      bcid: opts.bcid || "code128",
+      text: opts.text,
+      scale: opts.scale || 2,
+      includetext: opts.includetext || false,
+      textxalign: "center",
+      height: opts.height || 10
+    }, opts.extra || {}));
+    el.innerHTML = svg;
+    var svgEl = el.querySelector("svg");
+    if (svgEl) {
+      var vb = (svgEl.getAttribute("viewBox") || "0 0 3 1").split(/\s+/).map(Number);
+      var h = opts.px || 56;
+      svgEl.style.height = h + "px";
+      svgEl.style.width = Math.round(h * (vb[2] / vb[3])) + "px";
+    }
+    el.style.visibility = "visible";
+  };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script>
+<script>
+  // PROTOTYPE — render all barcode placeholders once bwip-js is loaded.
+  (function () {
+    function renderAll() {
+      document.querySelectorAll("[data-bcid]").forEach(function (el) {
+        if (el.dataset.rendered) return;
+        try {
+          window.__renderBarcode(el, { bcid: el.dataset.bcid, text: el.dataset.text });
+          el.dataset.rendered = "1";
+        } catch (e) {
+          el.textContent = "barcode error: " + e.message;
+        }
+      });
+      if (window.__homeB && __homeB.init) { __homeB.init(); }
+      if (window.__homeC && __homeC.rerender) { __homeC.rerender(); }
+    }
+    if (typeof bwipjs !== "undefined") { renderAll(); }
+    else { window.addEventListener("load", function () { renderAll(); }); }
+  })();
+</script>
+<script>
+  // PROTOTYPE — floating switcher (?variant= URL param, arrow keys). Throwaway.
+  (function () {
+    var KEYS = ["A", "B", "C"];
+    var NAMES = { A: "Grid gallery", B: "One-by-one showcase", C: "Create-first" };
+    function current() {
+      return new URLSearchParams(window.location.search).get("variant") || "A";
+    }
+    function go(v) {
+      var url = new URL(window.location.href);
+      url.searchParams.set("variant", v);
+      window.location.href = url.toString();
+    }
+    window.__homeProto = {
+      prev: function () {
+        var i = KEYS.indexOf(current());
+        go(KEYS[(i + KEYS.length - 1) % KEYS.length]);
+      },
+      next: function () {
+        var i = KEYS.indexOf(current());
+        go(KEYS[(i + 1) % KEYS.length]);
+      }
+    };
+    document.addEventListener("keydown", function (e) {
+      if (e.target.matches("input, textarea, [contenteditable]")) return;
+      if (!document.getElementById("proto")) return;
+      var i = KEYS.indexOf(current());
+      if (e.key === "ArrowRight") { e.preventDefault(); go(KEYS[(i + 1) % KEYS.length]); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); go(KEYS[(i + KEYS.length - 1) % KEYS.length]); }
+    });
+    window.__homeProtoNames = NAMES;
+  })();
+</script>
+
+<style>
+  /* PROTOTYPE styles — throwaway, Notion-design-flavored but rough */
+  body { font-family: Inter, system-ui, -apple-system, sans-serif; margin: 0; background: #f7f6f3; color: #191919; }
+  .hp { min-height: 100vh; display: flex; flex-direction: column; padding-bottom: 80px; }
+  em { font-style: normal; color: #9b9a97; font-size: 12px; }
+  /* A — recent batches as content below the grid */
+  .hp-recent { max-width: 1080px; width: 100%; box-sizing: border-box; margin: 0 auto; padding: 8px 24px 48px; }
+  .hp-recent h2 { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 12px; }
+  .hp-recent ul { list-style: none; margin: 0; padding: 0; background: #fff; border: 1px solid #e5e3df; border-radius: 12px; overflow: hidden; }
+  .hp-batch-row { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; padding: 13px 16px; font-size: 14px; border-bottom: 1px solid #f0eeea; }
+  .hp-batch-row:last-child { border-bottom: none; }
+  .hp-count { color: #5f5e5b; }
+  .hp-sep { color: #c1c0bc; }
+  .hp-date { color: #9b9a97; }
+  .hp-recent .hp-note { margin-top: 10px; }
+  .hp-purple { background: #5645d4 !important; color: #fff !important; border: none; border-radius: 8px; font-weight: 500; cursor: pointer; }
+
+  /* A — gallery grid */
+  .hp-hero { background: #0a1530; color: #fff; padding: 56px 24px 40px; text-align: center; }
+  .hp-hero h1 { margin: 0 0 8px; font-size: 40px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.05; }
+  .hp-hero p { margin: 0; color: #c9cfdd; font-size: 16px; line-height: 1.55; }
+  .hp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; padding: 32px 24px; max-width: 1080px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+  .hp-card { border: 1px solid #e5e3df; border-radius: 12px; padding: 16px; text-align: center; cursor: pointer; font: inherit; display: flex; flex-direction: column; gap: 10px; align-items: center; transition: transform .08s, box-shadow .08s; }
+  .hp-card:hover { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(15,15,15,.08); }
+  .hp-card.picked { outline: 3px solid #5645d4; }
+  .hp-card-name { font-weight: 600; font-size: 15px; }
+  .hp-card-bar { min-height: 60px; display: flex; align-items: center; visibility: hidden; background: #fff; border-radius: 6px; padding: 4px 8px; max-width: 100%; }
+  .hp-card-blurb { font-size: 13px; color: #5f5e5b; line-height: 1.45; }
+  .hp-chosen { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: #fff; border: 1px solid #e5e3df; border-radius: 8px; padding: 10px 16px; box-shadow: 0 4px 14px rgba(15,15,15,.12); font-size: 14px; z-index: 90; }
+  .hp-foot { margin-top: auto; border-top: 1px solid #e5e3df; padding: 16px 24px; font-size: 13px; color: #5f5e5b; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; background: #fff; }
+
+  /* B — one-by-one showcase */
+  .hp-b { background: #0a1530; color: #fff; align-items: center; text-align: center; }
+  .hp-b-top { width: 100%; display: flex; justify-content: space-between; padding: 20px 28px; box-sizing: border-box; font-size: 14px; color: #c9cfdd; }
+  .hp-b-top a { color: #c9cfdd; }
+  .hp-b-stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 24px; width: 100%; box-sizing: border-box; position: relative; }
+  .hp-b-count { font-size: 13px; color: #8b93a7; letter-spacing: .08em; }
+  .hp-b-slide { display: none; flex-direction: column; align-items: center; gap: 10px; }
+  .hp-b-slide.active { display: flex; }
+  .hp-b-slide h1 { margin: 0; font-size: 44px; font-weight: 600; letter-spacing: -0.02em; }
+  .hp-b-blurb { margin: 0; color: #c9cfdd; font-size: 17px; line-height: 1.55; }
+  .hp-b-bar { visibility: hidden; background: #fff; border-radius: 10px; padding: 16px 22px; margin: 10px 0; max-width: min(560px, 86vw); }
+  .hp-b-dots span { color: #39415c; margin: 0 3px; font-size: 11px; }
+  .hp-b-dots span.on { color: #ffffff; }
+  .hp-b-cta { padding: 12px 28px; font-size: 16px; }
+  .hp-b-arrows { position: fixed; bottom: 88px; right: 24px; display: flex; gap: 8px; }
+  .hp-b-arrows button { width: 44px; height: 44px; border-radius: 999px; border: 1px solid #39415c; background: #141d38; color: #fff; font-size: 20px; cursor: pointer; }
+  .hp-b-next { position: fixed; inset: 0; margin: auto; width: min(480px, 92vw); height: fit-content; background: #fff; color: #191919; border-radius: 12px; padding: 24px; box-shadow: 0 12px 40px rgba(0,0,0,.4); z-index: 95; text-align: left; }
+  .hp-b-next h2 { margin: 0 0 14px; font-size: 20px; }
+  .hp-b-next label, .hp-c-form label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 12px; }
+  .hp-b-next input, .hp-c-form input, .hp-c-form select { display: block; width: 100%; box-sizing: border-box; margin-top: 4px; padding: 8px 10px; border: 1px solid #e5e3df; border-radius: 6px; font: inherit; font-size: 14px; }
+  .hp-note { font-size: 12px; color: #9b9a97; line-height: 1.5; }
+  .hp-b-next button:not(.live-bar) { margin-top: 6px; }
+
+  /* C — create-first */
+  .hp-c-top { display: flex; justify-content: space-between; align-items: baseline; padding: 28px 28px 0; max-width: 1080px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+  .hp-c-top h1 { margin: 0; font-size: 30px; font-weight: 600; letter-spacing: -0.02em; }
+  .hp-chips { display: flex; gap: 8px; padding: 16px 28px; flex-wrap: wrap; max-width: 1080px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+  .hp-chip { border: 1px solid #e5e3df; background: #fff; border-radius: 999px; padding: 7px 14px; font: inherit; font-size: 13px; cursor: pointer; }
+  .hp-chip.active { background: #0a1530; color: #fff; border-color: #0a1530; }
+  .hp-c-main { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1080px; margin: 0 auto; padding: 0 28px; width: 100%; box-sizing: border-box; }
+  @media (max-width: 800px) { .hp-c-main { grid-template-columns: 1fr; } }
+  .hp-c-preview { background: #fff; border: 1px solid #e5e3df; border-radius: 12px; padding: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: 280px; }
+  .hp-c-bar-wrap { width: 100%; display: flex; justify-content: center; visibility: hidden; }
+  .hp-c-form { background: #fff; border: 1px solid #e5e3df; border-radius: 12px; padding: 20px; }
+  .hp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .hp-c-form fieldset { border: 1px solid #e5e3df; border-radius: 8px; margin: 0 0 14px; padding: 12px; }
+  .hp-c-form legend { font-size: 12px; font-weight: 600; padding: 0 6px; }
+  .hp-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .hp-c-create { padding: 10px 22px; font-size: 15px; }
+
+  /* floating switcher — shared across variants */
+  .hproto-switcher { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: #111827; color: #fff; border-radius: 999px; padding: 6px 10px; display: flex; gap: 10px; align-items: center; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,.3); z-index: 100; }
+  .hproto-switcher button { background: #374151; border: none; color: #fff; border-radius: 999px; width: 28px; height: 28px; cursor: pointer; font-size: 14px; }
+  .hproto-switcher .lbl { min-width: 210px; text-align: center; }
+</style>

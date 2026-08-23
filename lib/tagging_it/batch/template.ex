@@ -14,6 +14,7 @@ defmodule TaggingIt.Batch.Template do
             fields: [],
             strategy: nil,
             symbology: "code128",
+            show_sequence: true,
             label_size: "avery5160"
 
   @type t :: %__MODULE__{
@@ -21,6 +22,7 @@ defmodule TaggingIt.Batch.Template do
           fields: [Field.t()],
           strategy: PatternStrategy.t() | UlidStrategy.t(),
           symbology: String.t(),
+          show_sequence: boolean(),
           label_size: String.t()
         }
 end

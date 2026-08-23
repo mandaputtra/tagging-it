@@ -36,6 +36,12 @@
                     aria-label={"Barcode #{code["code_data"]}"}
                   ></div>
                   <div class="lines">
+                    <%= if Map.get(@batch["template"] || %{}, "show_sequence", true) do %>
+                      <div class="line label-seq">
+                        <span class="line-name">No.</span>
+                        <span class="line-value"><%= code["sequence"] || "" %></span>
+                      </div>
+                    <% end %>
                     <%= for field <- code["fields"] do %>
                       <div class="line">
                         <span class="line-name"><%= field["name"] %></span>

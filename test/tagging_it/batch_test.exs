@@ -53,6 +53,27 @@ defmodule TaggingIt.BatchTest do
 
       assert Enum.all?(codes, &(&1.fields == expected))
     end
+    test "the generator fills each code's sequence; value (code_data) defaults to it" do
+      assert {:ok, _batch, codes} = Batch.create(template())
+
+      assert Enum.map(codes, & &1.sequence) == [
+               "CODEPRODUCT00000120260101",
+               "CODEPRODUCT00000220260101",
+               "CODEPRODUCT00000320260101"
+             ]
+
+      # Value defaults to the sequence — editing them apart is per-code.
+      assert Enum.all?(codes, &(&1.code_data == &1.sequence))
+    end
+
+    test "ulid strategy: sequence is the generated ulid and value mirrors it" do
+      t = template(strategy: %UlidStrategy{count: 2})
+
+      assert {:ok, _batch, codes} = Batch.create(t)
+      assert length(codes) == 2
+      assert Enum.all?(codes, &(String.length(&1.sequence) == 26))
+      assert Enum.all?(codes, &(&1.code_data == &1.sequence))
+    end
 
     test "new codes and the batch are dirty (pending sync)" do
       assert {:ok, batch, codes} = Batch.create(template())
@@ -80,11 +101,31 @@ defmodule TaggingIt.BatchTest do
       assert Enum.all?(codes, &(&1.fields == []))
     end
 
-    test "batch id and code ids are valid uuid v4" do
+    test "batch id and code ids are valid uuid v7" do
       assert {:ok, batch, codes} = Batch.create(template())
 
       ids = [batch.id | Enum.map(codes, & &1.id)]
       assert Enum.all?(ids, &TaggingIt.UUID.valid?/1)
+    end
+  end
+
+  describe "create_from_values/2" do
+    test "sequences default to 1..N while values are the pasted strings" do
+      t = template(strategy: %PatternStrategy{prefix: "P", start: 1, count: 1})
+
+      assert {:ok, batch, codes} = Batch.create_from_values(t, ["SN-001", "SN-002\n", "", "  SN-003 "])
+
+      assert length(codes) == 3
+      assert Enum.map(codes, & &1.sequence) == ["1", "2", "3"]
+      assert Enum.map(codes, & &1.code_data) == ["SN-001", "SN-002", "SN-003"]
+      assert Enum.all?(codes, &(&1.batch_id == batch.id))
+    end
+
+    test "empty input produces an empty batch" do
+      t = template(strategy: %PatternStrategy{prefix: "P", start: 1, count: 1})
+
+      assert {:ok, _batch, codes} = Batch.create_from_values(t, ["", "  "])
+      assert codes == []
     end
   end
 end

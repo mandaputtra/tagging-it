@@ -8,7 +8,7 @@ import type { BatchRecord, CodeRecord } from "../js/types.js";
 const batch: BatchRecord = {
   id: "b-1",
   name: "Products",
-  template: { name: "T", fields: [], strategy: { type: "pattern" }, symbology: "code128", label_size: "avery5160" },
+  template: { name: "T", fields: [], strategy: { type: "pattern" }, symbology: "code128", label_size: "avery5160", show_sequence: true },
   code_ids: ["c-1", "c-2"],
   created_at: "2026-01-01T00:00:00.000Z",
   updated_at: "2026-01-01T00:00:00.000Z",
@@ -19,6 +19,7 @@ const codes: CodeRecord[] = [
   {
     id: "c-1",
     batch_id: "b-1",
+    sequence: "CODEPRODUCT00000120260101",
     code_data: "CODEPRODUCT00000120260101",
     symbology: "code128",
     fields: [{ name: "SKU", value: "" }],
@@ -29,6 +30,7 @@ const codes: CodeRecord[] = [
   {
     id: "c-2",
     batch_id: "b-1",
+    sequence: "CODEPRODUCT00000220260101",
     code_data: "CODEPRODUCT00000220260101",
     symbology: "code128",
     fields: [{ name: "SKU", value: "" }],

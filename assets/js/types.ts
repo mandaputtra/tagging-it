@@ -28,6 +28,8 @@ export interface Template {
   strategy: Strategy;
   symbology: string;
   label_size: LabelSize;
+  /** Print the per-code sequence on each label (#14). */
+  show_sequence: boolean;
 }
 
 /** A batch as stored in IndexedDB / pushed by the server. */
@@ -45,6 +47,8 @@ export interface BatchRecord {
 export interface CodeRecord {
   id: string;
   batch_id: string;
+  /** Unique per-code ordering string (#14). */
+  sequence: string;
   code_data: string;
   symbology: string;
   fields: Field[];
@@ -57,6 +61,9 @@ export interface CodeRecord {
 export interface RecentBatchWire {
   id: string;
   name: string;
+  /** Symbology id of the batch template (rendered as display name server-side). */
+  symbology: string;
+  created_at: string;
   updated_at: string;
   code_count: number;
 }

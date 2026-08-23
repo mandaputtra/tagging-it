@@ -9,6 +9,7 @@ const template = {
   strategy: { type: "pattern" as const },
   symbology: "code128",
   label_size: "avery5160" as const,
+  show_sequence: true,
 };
 
 describe("buildSheetPayload", () => {
@@ -26,6 +27,7 @@ describe("buildSheetPayload", () => {
       {
         id: "c1",
         batch_id: "b1",
+        sequence: "CODEPRODUCT00000120260101",
         code_data: "CODEPRODUCT00000120260101",
         symbology: "code128",
         fields: [{ name: "SKU", value: "" }],
@@ -52,6 +54,7 @@ describe("buildSheetPayload", () => {
       {
         id: "c1",
         batch_id: "b2",
+        sequence: "1",
         code_data: "X",
         symbology: "code128",
         fields: [],

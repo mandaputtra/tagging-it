@@ -33,6 +33,7 @@ defmodule TaggingItWeb.BatchSerializer do
     %{
       "id" => code.id,
       "batch_id" => code.batch_id,
+      "sequence" => code.sequence,
       "code_data" => code.code_data,
       "symbology" => code.symbology,
       "fields" => Enum.map(code.fields, &field_map/1),
@@ -48,7 +49,8 @@ defmodule TaggingItWeb.BatchSerializer do
       "fields" => Enum.map(template.fields, &field_map/1),
       "strategy" => strategy_map(template.strategy),
       "symbology" => template.symbology,
-      "label_size" => template.label_size
+      "label_size" => template.label_size,
+      "show_sequence" => template.show_sequence
     }
   end
 

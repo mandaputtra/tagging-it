@@ -45,6 +45,24 @@ defmodule TaggingItWeb.BatchFormLiveTest do
       assert "datamatrix" in options
       assert "azteccode" in options
     end
+    test "preselects the symbology from the ?symbology= query param (gallery entry)" do
+      {:ok, _view, html} = live(build_conn(), "/batches/new?symbology=qrcode")
+
+      selected_value =
+        find(html, "select[name='batch[symbology]'] option[selected]")
+        |> Floki.attribute("value")
+
+      assert selected_value == ["qrcode"]
+    end
+
+    test "sequence is printed on labels by default, with a toggle to hide it" do
+      {:ok, _view, html} = live(build_conn(), "/batches/new")
+
+      checkbox = find(html, "input[name='batch[show_sequence]']")
+      assert checkbox != []
+      # Phoenix renders boolean attributes as empty-string values.
+      assert Floki.attribute(checkbox, "checked") == [""]
+    end
   end
 
   describe "sequence mode" do
@@ -79,6 +97,33 @@ defmodule TaggingItWeb.BatchFormLiveTest do
                "CODEPRODUCT00000120260101",
                "CODEPRODUCT00000220260101",
                "CODEPRODUCT00000320260101"
+             ]
+    end
+    test "pushed codes carry their sequence; template carries show_sequence" do
+      {:ok, view, _html} = live(build_conn(), "/batches/new")
+
+      render_submit(view, "create_batch", %{
+        "batch" => %{
+          "name" => "Products",
+          "mode" => "pattern",
+          "prefix" => "CODEPRODUCT",
+          "start" => "1",
+          "count" => "2",
+          "date" => "2026-01-01",
+          "label_size" => "avery5160",
+          "show_sequence" => "false"
+        },
+        "fields" => %{}
+      })
+
+      assert_push_event(view, "batch:created", %{
+        batch: %{"template" => %{"show_sequence" => false}},
+        codes: codes
+      })
+
+      assert Enum.map(codes, & &1["sequence"]) == [
+               "CODEPRODUCT00000120260101",
+               "CODEPRODUCT00000220260101"
              ]
     end
 

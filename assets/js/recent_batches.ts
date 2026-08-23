@@ -16,6 +16,8 @@ export function recentBatchesPayload(batches: BatchRecord[]): RecentBatchWire[] 
     .map((b) => ({
       id: b.id,
       name: b.name,
+      symbology: b.template?.symbology ?? "",
+      created_at: b.created_at,
       updated_at: b.updated_at,
       code_count: (b.code_ids ?? []).length,
     }));

@@ -9748,12 +9748,14 @@ function renderBarcodes(container, toSvg) {
 var MAX_RECENT = 6;
 function recentBatchesPayload(batches) {
   return [...batches].sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at))).slice(0, MAX_RECENT).map((b) => {
-    var _a2;
+    var _a2, _b, _c;
     return {
       id: b.id,
       name: b.name,
+      symbology: (_b = (_a2 = b.template) == null ? void 0 : _a2.symbology) != null ? _b : "",
+      created_at: b.created_at,
       updated_at: b.updated_at,
-      code_count: ((_a2 = b.code_ids) != null ? _a2 : []).length
+      code_count: ((_c = b.code_ids) != null ? _c : []).length
     };
   });
 }
@@ -58916,6 +58918,14 @@ FontLib.loadFont("OCR-B", 96, 100, "AAEAAAAPAIAAAwBwRkZUTXxHn14AADmUAAAAHEdERUYA
 // js/app.ts
 var Hooks2 = {};
 Hooks2.RecentBatches = RecentBatches;
+Hooks2.SymbologyGallery = {
+  mounted() {
+    renderBarcodes(this.el, (opts) => ToSVG(opts));
+  },
+  updated() {
+    renderBarcodes(this.el, (opts) => ToSVG(opts));
+  }
+};
 Hooks2.BatchDelete = {
   mounted() {
     this.el.addEventListener("click", async (ev) => {

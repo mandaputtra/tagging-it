@@ -19,6 +19,17 @@ const Hooks: Record<string, Hook> = {};
 
 Hooks.RecentBatches = RecentBatches;
 
+// Landing gallery: render each card's live bwip-js example on mount, and
+// re-inject after each server morph (placeholders render empty server-side).
+Hooks.SymbologyGallery = {
+  mounted() {
+    renderBarcodes(this.el, (opts) => toSVG(opts));
+  },
+  updated() {
+    renderBarcodes(this.el, (opts) => toSVG(opts));
+  },
+};
+
 // Landing recent-batch cards: delete from IndexedDB (cascade codes), then
 // push the refreshed list back to the server for re-render.
 Hooks.BatchDelete = {

@@ -13,6 +13,7 @@ export function makeBatch(id: string = "b1", name: string = "Batch One"): BatchR
       strategy: { type: "pattern", prefix: "ITM", start: 1, count: 2, date: "2026-08-22" },
       symbology: "qr",
       label_size: "avery5160",
+      show_sequence: true,
     },
     code_ids: ["c1", "c2"],
     created_at: now(),
@@ -25,6 +26,7 @@ export function makeCode(id: string, batchId: string, codeData: string): CodeRec
   return {
     id,
     batch_id: batchId,
+    sequence: codeData,
     code_data: codeData,
     symbology: "qr",
     fields: [{ name: "item", value: "widget" }],

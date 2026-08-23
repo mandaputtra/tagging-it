@@ -13,6 +13,7 @@ defmodule TaggingIt.Code do
   @enforce_keys [:id, :batch_id, :code_data, :fields]
   defstruct id: nil,
             batch_id: nil,
+            sequence: "",
             code_data: "",
             symbology: "code128",
             fields: [],
@@ -23,6 +24,7 @@ defmodule TaggingIt.Code do
   @type t :: %__MODULE__{
           id: String.t(),
           batch_id: String.t(),
+          sequence: String.t(),
           code_data: String.t(),
           symbology: String.t(),
           fields: [Field.t()],

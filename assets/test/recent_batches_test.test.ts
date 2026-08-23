@@ -8,7 +8,7 @@ describe("recentBatchesPayload", () => {
     {
       id: "b-1",
       name: "Products",
-      template: { name: "T", fields: [], strategy: { type: "pattern" }, symbology: "code128", label_size: "avery5160" },
+      template: { name: "T", fields: [], strategy: { type: "pattern" }, symbology: "code128", label_size: "avery5160", show_sequence: true },
       code_ids: ["c1", "c2", "c3"],
       created_at: "2026-08-01T00:00:00.000Z",
       updated_at: "2026-08-22T10:00:00.000Z",
@@ -17,7 +17,7 @@ describe("recentBatchesPayload", () => {
     {
       id: "b-2",
       name: "Old labels",
-      template: { name: "T", fields: [], strategy: { type: "pattern" }, symbology: "code128", label_size: "avery5160" },
+      template: { name: "T", fields: [], strategy: { type: "pattern" }, symbology: "qrcode", label_size: "avery5160", show_sequence: true },
       code_ids: ["c4"],
       created_at: "2026-08-01T00:00:00.000Z",
       updated_at: "2026-08-01T10:00:00.000Z",
@@ -25,10 +25,10 @@ describe("recentBatchesPayload", () => {
     },
   ];
 
-  it("maps batches to id, name, updated_at, code_count", () => {
+  it("maps batches to id, name, symbology, dates, code_count", () => {
     expect(recentBatchesPayload(batches)).toEqual([
-      { id: "b-1", name: "Products", updated_at: "2026-08-22T10:00:00.000Z", code_count: 3 },
-      { id: "b-2", name: "Old labels", updated_at: "2026-08-01T10:00:00.000Z", code_count: 1 },
+      { id: "b-1", name: "Products", symbology: "code128", created_at: "2026-08-01T00:00:00.000Z", updated_at: "2026-08-22T10:00:00.000Z", code_count: 3 },
+      { id: "b-2", name: "Old labels", symbology: "qrcode", created_at: "2026-08-01T00:00:00.000Z", updated_at: "2026-08-01T10:00:00.000Z", code_count: 1 },
     ]);
   });
 
@@ -41,7 +41,7 @@ describe("recentBatchesPayload", () => {
     const many: BatchRecord[] = Array.from({ length: 10 }, (_, i) => ({
       id: `b-${i}`,
       name: `B${i}`,
-      template: { name: "T", fields: [], strategy: { type: "pattern" }, symbology: "code128", label_size: "avery5160" },
+      template: { name: "T", fields: [], strategy: { type: "pattern" }, symbology: "code128", label_size: "avery5160", show_sequence: true },
       code_ids: [],
       created_at: "2026-08-01T00:00:00.000Z",
       updated_at: `2026-08-01T00:00:0${i}.000Z`,

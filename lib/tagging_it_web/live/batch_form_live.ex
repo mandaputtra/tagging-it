@@ -39,7 +39,9 @@ defmodule TaggingItWeb.BatchFormLive do
   ]
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
+    symbology = Map.get(params, "symbology", "code128")
+
     {:ok,
      assign(socket,
        form: %{
@@ -51,7 +53,8 @@ defmodule TaggingItWeb.BatchFormLive do
          date: Date.to_iso8601(Date.utc_today()),
          paste: "",
          label_size: "avery5160",
-         symbology: "code128"
+         symbology: symbology,
+         show_sequence: true
        },
        fields: [%Field{name: "", value: ""}],
        label_sizes: @label_sizes,
@@ -131,7 +134,9 @@ defmodule TaggingItWeb.BatchFormLive do
       fields: fields,
       strategy: strategy,
       symbology: symbology,
-      label_size: label_size
+      label_size: label_size,
+      # Unchecked checkboxes send no value — only an explicit "true" prints it.
+      show_sequence: batch_params["show_sequence"] == "true"
     }
 
     {:ok, template, errors: Enum.reverse(errors)}

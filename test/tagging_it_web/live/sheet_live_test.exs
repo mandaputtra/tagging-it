@@ -54,17 +54,28 @@ defmodule TaggingItWeb.SheetLiveTest do
       assert find(html, ".label") == []
     end
 
-    test "shows an error message and does not crash on an invalid payload" do
+    test "renders the sequence line on each label by default" do
       {:ok, view, _html} = live(build_conn(), "/sheet/batch-1")
+      {batch, codes} = sample_sheet()
 
-      html =
-        render_click(view, "sheet:loaded", %{
-          "batch" => %{"id" => ""},
-          "codes" => "not-a-list"
-        })
+      html = render_click(view, "sheet:loaded", %{"batch" => wire(batch), "codes" => wire(codes)})
 
-      assert find(html, ".sheet-error") != []
-      assert text(html) =~ "Couldn't load sheet data"
+      for code <- codes do
+        assert [label] = find(html, ~s(.label[data-code-data="#{code.code_data}"]))
+        assert [seq] = Floki.find(label, ".label-seq")
+        assert Floki.text(seq) =~ code.sequence
+      end
+    end
+
+    test "omits the sequence line when the template hides it" do
+      {:ok, view, _html} = live(build_conn(), "/sheet/batch-1")
+      {batch, codes} = sample_sheet()
+      batch = put_in(batch.template.show_sequence, false)
+
+      html = render_click(view, "sheet:loaded", %{"batch" => wire(batch), "codes" => wire(codes)})
+
+      assert find(html, ".label-seq") == []
+      assert length(find(html, ".label")) == length(codes)
     end
   end
 

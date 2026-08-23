@@ -2,10 +2,12 @@ defmodule TaggingIt.Batch do
   @moduledoc """
   Batch aggregate — a group of codes created together from one batch template.
 
-  `create/1` generates the code data per the template's strategy; `create_from_values/2`
-  builds codes from user-supplied code data (paste mode). Both stamp each code
-  with the batch id and pre-fill each code's field map from the template. New
-  codes and the batch are marked dirty (pending premium sync).
+  `create/1` generates each code's **Sequence** per the template's strategy and
+  sets the **Value** (`code_data`) to the sequence by default (#14);
+  `create_from_values/2` builds codes from user-supplied values (paste mode),
+  numbering their sequences `1..N`. Both stamp each code with the batch id and
+  pre-fill each code's field map from the template. New codes and the batch are
+  marked dirty (pending premium sync).
   """
 
   alias TaggingIt.Batch.Template
@@ -34,20 +36,24 @@ defmodule TaggingIt.Batch do
   @doc """
   Creates a batch and its codes from a template.
 
+  The generator fills each code's **Sequence** (unique per code); the **Value**
+  (`code_data`) defaults to the sequence and is editable apart per code (#14).
+
   Returns `{:ok, batch, codes}` or `{:error, :invalid_strategy}` when the
   template's strategy cannot generate code data.
   """
   @spec create(Template.t()) :: {:ok, Batch.t(), [Code.t()]} | {:error, atom()}
   def create(%Template{} = template) do
-    with {:ok, code_data_list} <- CodeData.generate(template.strategy) do
-      build(template, code_data_list)
+    with {:ok, sequences} <- CodeData.generate(template.strategy) do
+      build(template, Enum.map(sequences, &{&1, &1}))
     end
   end
 
   @doc """
   Creates a batch whose codes carry the given code data values (paste mode).
 
-  Values are trimmed; blank lines are dropped. Returns `{:ok, batch, codes}`.
+  Values are trimmed; blank lines are dropped. Sequences default to `1..N`
+  (#14). Returns `{:ok, batch, codes}`.
   """
   @spec create_from_values(Template.t(), [String.t()]) :: {:ok, Batch.t(), [Code.t()]}
   def create_from_values(%Template{} = template, values) do
@@ -56,18 +62,25 @@ defmodule TaggingIt.Batch do
       |> Enum.map(&String.trim/1)
       |> Enum.reject(&(&1 == ""))
 
-    build(template, code_data_list)
+    pairs =
+      code_data_list
+      |> Enum.with_index(1)
+      |> Enum.map(fn {code_data, i} -> {Integer.to_string(i), code_data} end)
+
+    build(template, pairs)
   end
 
-  defp build(template, code_data_list) do
+  # pairs = [{sequence, code_data}] — one per code.
+  defp build(template, pairs) do
     now = DateTime.utc_now()
     batch_id = TaggingIt.UUID.generate()
 
     codes =
-      Enum.map(code_data_list, fn code_data ->
+      Enum.map(pairs, fn {sequence, code_data} ->
         %Code{
           id: TaggingIt.UUID.generate(),
           batch_id: batch_id,
+          sequence: sequence,
           code_data: code_data,
           symbology: template.symbology,
           fields: template.fields,

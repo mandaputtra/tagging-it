@@ -1,115 +1,205 @@
-<div id="batch-form-view" phx-hook="BatchCreator">
-  <h1>New batch</h1>
-
-  <%= if @errors != [] do %>
-    <div class="form-errors" role="alert">
-      <%= for error <- @errors do %>
-        <p class="form-error"><%= error %></p>
-      <% end %>
+<div id="batch-form-view" phx-hook="BatchCreator" class="min-h-screen bg-sticker-cream font-body text-sticker-ink">
+  <div class="relative mx-auto flex min-h-screen w-full max-w-[420px] flex-col pb-12">
+    <!-- Nav row -->
+    <div class="flex items-center justify-between px-6 pt-3.5">
+      <a
+        href="/batches/new"
+        aria-label="Back to batch types"
+        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-white shadow-[3px_3px_0_0_rgba(43,42,61,0.15)] outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px]"
+      >
+        {icon(:arrow_left, "h-[18px] w-[18px] text-sticker-ink")}
+      </a>
+      <h1 class="font-display text-[26px] font-extrabold text-sticker-ink">New batch</h1>
+      <span class="code-chip flex shrink-0 items-center gap-[4px] rounded-[999px] bg-sticker-yellow p-[6px_12px] outline-[2.5px] outline-solid outline-sticker-ink outline-offset-[-1.25px]">
+        {icon(:barcode, "h-[14px] w-[14px] text-sticker-ink")}
+        <span class="text-[12px] font-bold text-sticker-ink">{@symbology_name}</span>
+      </span>
     </div>
-  <% end %>
 
-  <form id="batch-form" phx-submit="create_batch">
-    <div class="field">
-      <label for="batch-name">Batch name</label>
-      <input id="batch-name" type="text" name="batch[name]" value={@form.name} placeholder="Products" />
-    </div>
+    <p class="w-full pt-2 text-center text-[13px] font-medium text-sticker-muted">
+      Configure your label batch
+    </p>
 
-    <fieldset class="field">
-      <legend>Input mode</legend>
-      <label><input type="radio" name="batch[mode]" value="pattern" checked={@form.mode == "pattern"} phx-click="set_mode" phx-value-mode="pattern" /> Generate (sequence)</label>
-      <label><input type="radio" name="batch[mode]" value="ulid" checked={@form.mode == "ulid"} phx-click="set_mode" phx-value-mode="ulid" /> Generate (ULID)</label>
-      <label><input type="radio" name="batch[mode]" value="paste" checked={@form.mode == "paste"} phx-click="set_mode" phx-value-mode="paste" /> Paste values</label>
-    </fieldset>
-
-    <%= if @form.mode != "paste" do %>
-      <div class="field" id="pattern-fields">
-        <label for="batch-prefix">Prefix</label>
-        <input id="batch-prefix" type="text" name="batch[prefix]" value={@form.prefix} placeholder="CODEPRODUCT" />
-
-        <label for="batch-start">Start</label>
-        <input id="batch-start" type="number" name="batch[start]" value={@form.start} min="1" />
-
-        <label for="batch-count">Count</label>
-        <input id="batch-count" type="number" name="batch[count]" value={@form.count} min="1" />
-
-        <%= if @form.mode == "pattern" do %>
-          <label for="batch-date">Date</label>
-          <input id="batch-date" type="date" name="batch[date]" value={@form.date} />
+    <%= if @errors != [] do %>
+      <div
+        class="form-errors mx-6 mt-4 rounded-[14px] bg-white p-3.5 shadow-sticker-card outline-[2.5px] outline-solid outline-sticker-coral outline-offset-[-1.25px]"
+        role="alert"
+      >
+        <%= for error <- @errors do %>
+          <p class="form-error text-[13px] font-medium text-sticker-ink"><%= error %></p>
         <% end %>
-      </div>
-    <% else %>
-      <div class="field" id="paste-fields">
-        <label for="batch-paste">Code data — one value per line</label>
-        <textarea id="batch-paste" name="batch[paste]" rows="6" placeholder={"SN-001\nSN-002\nSN-003"}><%= @form.paste %></textarea>
       </div>
     <% end %>
 
-    <div class="field">
-      <label for="batch-symbology">Code type</label>
-      <select id="batch-symbology" name="batch[symbology]">
-        <%= for s <- @symbologies do %>
-          <option value={s.id} selected={@form.symbology == s.id}><%= s.name %></option>
-        <% end %>
-      </select>
-    </div>
+    <form id="batch-form" phx-submit="create_batch" class="mt-6 flex flex-col gap-3.5 px-6 pb-6">
+      <input type="hidden" name="batch[mode]" value={@form.mode} />
+      <input type="hidden" name="batch[symbology]" value={@form.symbology} />
 
-    <div class="field">
-      <label for="batch-label-size">Label size</label>
-      <select id="batch-label-size" name="batch[label_size]">
-        <%= for size <- @label_sizes do %>
-          <option value={size.id} selected={@form.label_size == size.id}><%= size.name %></option>
-        <% end %>
-      </select>
-    </div>
-    <div class="field">
-      <label>
-        <input type="checkbox" name="batch[show_sequence]" value="true" checked={@form.show_sequence} />
-        Print sequence on each label
+      <div class="flex w-full flex-col gap-[5px]">
+        <label for="batch-name" class="text-[13px] font-semibold text-sticker-ink">Batch name</label>
+        <input
+          id="batch-name"
+          type="text"
+          name="batch[name]"
+          value={@form.name}
+          placeholder="Products"
+          class="h-[46px] w-full rounded-[14px] bg-white p-[10px_14px] text-[14px] text-sticker-ink outline-[2.5px] outline-solid outline-sticker-ink outline-offset-[-1.25px] placeholder:text-sticker-muted"
+        />
+      </div>
+
+      <div class="flex w-full flex-col gap-[5px]">
+        <span class="text-[13px] font-semibold text-sticker-ink">Input mode</span>
+        <div class="flex flex-col gap-2">
+          <%= for option <- @mode_options do %>
+            <button
+              type="button"
+              phx-click="set_mode"
+              phx-value-mode={option.id}
+              class={"flex w-fit items-center gap-[10px] rounded-[12px] p-[10px_14px] outline-solid outline-sticker-ink #{if @form.mode == option.id, do: "bg-sticker-yellow outline-[2.5px] outline-offset-[-1.25px]", else: "bg-white outline-2 outline-offset-[-1px]"}"}
+            >
+              <span class={"h-[14px] w-[14px] shrink-0 rounded-full outline-2 outline-solid outline-sticker-ink outline-offset-[-1px] #{if @form.mode == option.id, do: "bg-sticker-ink", else: "bg-white"}"}></span>
+              <span class={if @form.mode == option.id, do: "text-[13px] font-bold text-sticker-ink", else: "text-[13px] font-medium text-sticker-muted"}>{option.label}</span>
+            </button>
+          <% end %>
+        </div>
+      </div>
+
+      <%= if @form.mode == "pattern" do %>
+        <div id="pattern-fields" class="flex w-full flex-col gap-[5px]">
+          <label for="batch-prefix" class="text-[13px] font-semibold text-sticker-ink">Prefix</label>
+          <input
+            id="batch-prefix"
+            type="text"
+            name="batch[prefix]"
+            value={@form.prefix}
+            placeholder="CODEPRODUCT"
+            class="h-[46px] w-full rounded-[14px] bg-white p-[10px_14px] text-[14px] text-sticker-ink outline-[2.5px] outline-solid outline-sticker-ink outline-offset-[-1.25px] placeholder:text-sticker-muted"
+          />
+
+          <label for="batch-start" class="text-[13px] font-semibold text-sticker-ink">Start</label>
+          <input
+            id="batch-start"
+            type="number"
+            name="batch[start]"
+            value={@form.start}
+            min="1"
+            placeholder="1"
+            class="h-[46px] w-full rounded-[14px] bg-white p-[10px_14px] text-[14px] text-sticker-ink outline-[2.5px] outline-solid outline-sticker-ink outline-offset-[-1.25px] placeholder:text-sticker-muted"
+          />
+
+          <label for="batch-count" class="text-[13px] font-semibold text-sticker-ink">Count</label>
+          <input
+            id="batch-count"
+            type="number"
+            name="batch[count]"
+            value={@form.count}
+            min="1"
+            placeholder="10"
+            class="h-[46px] w-full rounded-[14px] bg-white p-[10px_14px] text-[14px] text-sticker-ink outline-[2.5px] outline-solid outline-sticker-ink outline-offset-[-1.25px] placeholder:text-sticker-muted"
+          />
+        </div>
+      <% end %>
+
+      <%= if @form.mode == "ulid" do %>
+        <div id="ulid-fields" class="flex w-full flex-col gap-[5px]">
+          <label for="batch-count" class="text-[13px] font-semibold text-sticker-ink">Count</label>
+          <input
+            id="batch-count"
+            type="number"
+            name="batch[count]"
+            value={@form.count}
+            min="1"
+            placeholder="10"
+            class="h-[46px] w-full rounded-[14px] bg-white p-[10px_14px] text-[14px] text-sticker-ink outline-[2.5px] outline-solid outline-sticker-ink outline-offset-[-1.25px] placeholder:text-sticker-muted"
+          />
+        </div>
+      <% end %>
+
+      <%= if @form.mode == "paste" do %>
+        <div id="paste-fields" class="flex w-full flex-col gap-[5px]">
+          <label for="batch-paste" class="text-[13px] font-semibold text-sticker-ink">Paste values</label>
+          <textarea
+            id="batch-paste"
+            name="batch[paste]"
+            rows="4"
+            placeholder="One value per line"
+            class="h-[120px] w-full rounded-[14px] bg-white p-3 text-[14px] text-sticker-ink outline-[2.5px] outline-solid outline-sticker-ink outline-offset-[-1.25px] placeholder:text-sticker-muted"
+          ><%= @form.paste %></textarea>
+        </div>
+      <% end %>
+
+      <div class="flex w-full flex-col gap-[5px]">
+        <label for="batch-label-size" class="text-[13px] font-semibold text-sticker-ink">Label size</label>
+        <div class="relative">
+          <select
+            id="batch-label-size"
+            name="batch[label_size]"
+            class="h-[46px] w-full appearance-none rounded-[14px] bg-white p-[10px_14px] text-[14px] text-sticker-ink outline-[2.5px] outline-solid outline-sticker-ink outline-offset-[-1.25px]"
+          >
+            <%= for size <- @label_sizes do %>
+              <option value={size.id} selected={@form.label_size == size.id}><%= size.name %></option>
+            <% end %>
+          </select>
+          <span class="pointer-events-none absolute right-[14px] top-1/2 -translate-y-1/2">
+            {icon(:chevron_down, "h-4 w-4 text-sticker-ink")}
+          </span>
+        </div>
+      </div>
+
+      <label class="flex w-fit cursor-pointer select-none items-center gap-[10px]">
+        <input type="checkbox" name="batch[show_sequence]" value="true" checked={@form.show_sequence} class="peer sr-only" />
+        <span class="flex h-[22px] w-[22px] items-center justify-center rounded-[6px] bg-sticker-yellow outline-[2.5px] outline-solid outline-sticker-ink outline-offset-[-1.25px]">
+          {icon(:check, "h-[14px] w-[14px] text-sticker-ink opacity-0 peer-checked:opacity-100")}
+        </span>
+        <span class="text-[13px] font-medium text-sticker-ink">Print sequence on each label</span>
       </label>
-    </div>
 
-    <div class="field">
-      <label>Label fields (name + shared value)</label>
-      <div id="fields-editor">
+      <span class="text-[13px] font-semibold text-sticker-ink">Label fields (name + shared value)</span>
+
+      <div id="fields-editor" class="flex w-full flex-col gap-2">
         <%= for {field, index} <- Enum.with_index(@fields) do %>
-          <div class="field-row" data-index={index}>
-            <input type="text" name={"fields[#{index}][name]"} value={field.name} placeholder="SKU" />
-            <input type="text" name={"fields[#{index}][value]"} value={field.value} placeholder={"(shared value)"} />
-            <button type="button" phx-click="remove_field" phx-value-index={index}>×</button>
+          <div class="flex w-full items-center gap-2" data-index={index}>
+            <input
+              type="text"
+              name={"fields[#{index}][name]"}
+              value={field.name}
+              placeholder="SKU"
+              class="h-[42px] min-w-0 flex-1 rounded-[12px] bg-white p-[8px_10px] text-[13px] text-sticker-ink outline-[2.5px] outline-solid outline-sticker-ink outline-offset-[-1.25px] placeholder:text-sticker-muted"
+            />
+            <input
+              type="text"
+              name={"fields[#{index}][value]"}
+              value={field.value}
+              placeholder="(shared value)"
+              class="h-[42px] min-w-0 flex-1 rounded-[12px] bg-white p-[8px_10px] text-[13px] text-sticker-ink outline-[2.5px] outline-solid outline-sticker-ink outline-offset-[-1.25px] placeholder:text-sticker-muted"
+            />
+            <button
+              type="button"
+              phx-click="remove_field"
+              phx-value-index={index}
+              aria-label="Remove field"
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-white text-[18px] font-semibold leading-none text-sticker-muted outline-2 outline-solid outline-sticker-ink outline-offset-[-1px]"
+            >×</button>
           </div>
         <% end %>
       </div>
-      <button type="button" phx-click="add_field">+ add field</button>
-    </div>
 
-    <button type="submit">Create batch</button>
-  </form>
+      <button
+        type="button"
+        phx-click="add_field"
+        class="flex w-full items-center justify-center gap-2 rounded-[12px] bg-white p-[10px_16px] outline-[2.5px] outline-solid outline-sticker-ink outline-offset-[-1.25px]"
+      >
+        {icon(:plus, "h-[14px] w-[14px] text-sticker-ink")}
+        <span class="text-[13px] font-semibold text-sticker-ink">add field</span>
+      </button>
+
+      <button
+        type="submit"
+        class="mt-1 flex w-full items-center justify-center gap-2 rounded-[40px] bg-sticker-coral p-[14px_0] shadow-sticker outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px]"
+      >
+        {icon(:plus, "h-[18px] w-[18px] text-sticker-ink")}
+        <span class="font-display text-[18px] font-semibold text-sticker-ink">Create batch</span>
+      </button>
+    </form>
+  </div>
 </div>
-
-<style>
-  #batch-form-view { max-width: 640px; margin: 0 auto; padding: 32px 16px; font-family: system-ui, -apple-system, sans-serif; }
-  #batch-form-view h1 { font-size: 24px; font-weight: 600; margin-bottom: 20px; }
-  #batch-form-view .field { margin-bottom: 16px; }
-  #batch-form-view label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 4px; }
-  #batch-form-view fieldset.field label { display: inline-block; margin-right: 16px; font-weight: 400; }
-  #batch-form-view input[type="text"],
-  #batch-form-view input[type="number"],
-  #batch-form-view input[type="date"],
-  #batch-form-view select,
-  #batch-form-view textarea {
-    width: 100%; box-sizing: border-box; padding: 8px 10px; font-size: 14px;
-    border: 1px solid #d1d5db; border-radius: 6px; margin-bottom: 8px;
-  }
-  #batch-form-view textarea { font-family: ui-monospace, monospace; }
-  #batch-form-view .field-row { display: flex; gap: 8px; margin-bottom: 8px; }
-  #batch-form-view .field-row input { flex: 1; margin-bottom: 0; }
-  #batch-form-view .field-row button { border: none; background: none; color: #9ca3af; font-size: 18px; cursor: pointer; }
-  #batch-form-view button[type="submit"] {
-    background: #2563eb; color: #fff; border: none; border-radius: 6px;
-    padding: 10px 18px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 8px;
-  }
-  #batch-form-view .form-errors { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; border-radius: 6px; padding: 12px; margin-bottom: 16px; }
-  #batch-form-view .form-error { margin: 0 0 4px; font-size: 13px; }
-  #batch-form-view .form-error:last-child { margin-bottom: 0; }
-</style>

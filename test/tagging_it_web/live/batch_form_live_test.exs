@@ -3,9 +3,11 @@ defmodule TaggingItWeb.BatchFormLiveTest do
 
   import Phoenix.LiveViewTest
 
+  @route "/batches/new/ean13"
+
   describe "mount" do
     test "renders the batch creation form" do
-      {:ok, _view, html} = live(build_conn(), "/batches/new")
+      {:ok, _view, html} = live(build_conn(), @route)
 
       assert find(html, "form#batch-form") != []
       assert find(html, "input[name='batch[name]']") != []
@@ -13,17 +15,23 @@ defmodule TaggingItWeb.BatchFormLiveTest do
       assert find(html, "input[name='batch[start]']") != []
       assert find(html, "input[name='batch[count]']") != []
       assert find(html, "select[name='batch[label_size]']") != []
+      # The design drops the date input; the strategy falls back to today.
+      assert find(html, "input[name='batch[date]']") == []
+      # Mode and symbology ride along as hidden fields so create_batch params
+      # are unchanged from the old radio/select markup.
+      assert Floki.attribute(find(html, "input[name='batch[mode]']"), "value") == ["pattern"]
+      assert Floki.attribute(find(html, "input[name='batch[symbology]']"), "value") == ["ean13"]
     end
 
     test "renders a field template editor with one empty row" do
-      {:ok, _view, html} = live(build_conn(), "/batches/new")
+      {:ok, _view, html} = live(build_conn(), @route)
 
       assert find(html, "input[name='fields[0][name]']") != []
       assert find(html, "input[name='fields[0][value]']") != []
     end
 
     test "offers the preset label sizes plus a custom option" do
-      {:ok, _view, html} = live(build_conn(), "/batches/new")
+      {:ok, _view, html} = live(build_conn(), @route)
 
       options = Floki.attribute(find(html, "select[name='batch[label_size]'] option"), "value")
       assert "avery5160" in options
@@ -31,32 +39,22 @@ defmodule TaggingItWeb.BatchFormLiveTest do
       assert "custom_50x25" in options
     end
 
-    test "offers the v1 symbology set with QR selectable" do
-      {:ok, _view, html} = live(build_conn(), "/batches/new")
+    test "shows the route symbology in the code chip" do
+      {:ok, _view, html} = live(build_conn(), @route)
 
-      options = Floki.attribute(find(html, "select[name='batch[symbology]'] option"), "value")
-      assert "code128" in options
-      assert "qrcode" in options
-      assert "code39" in options
-      assert "ean13" in options
-      assert "ean8" in options
-      assert "upca" in options
-      assert "pdf417" in options
-      assert "datamatrix" in options
-      assert "azteccode" in options
+      assert find(html, ".code-chip") != []
+      assert text(html) =~ "EAN-13"
     end
-    test "preselects the symbology from the ?symbology= query param (gallery entry)" do
-      {:ok, _view, html} = live(build_conn(), "/batches/new?symbology=qrcode")
 
-      selected_value =
-        find(html, "select[name='batch[symbology]'] option[selected]")
-        |> Floki.attribute("value")
+    test "preselects the symbology from the route path segment (gallery entry)" do
+      {:ok, _view, html} = live(build_conn(), "/batches/new/qrcode")
 
-      assert selected_value == ["qrcode"]
+      assert text(html) =~ "QR Code"
+      assert Floki.attribute(find(html, "input[name='batch[symbology]']"), "value") == ["qrcode"]
     end
 
     test "sequence is printed on labels by default, with a toggle to hide it" do
-      {:ok, _view, html} = live(build_conn(), "/batches/new")
+      {:ok, _view, html} = live(build_conn(), @route)
 
       checkbox = find(html, "input[name='batch[show_sequence]']")
       assert checkbox != []
@@ -65,9 +63,56 @@ defmodule TaggingItWeb.BatchFormLiveTest do
     end
   end
 
+  describe "mode switching" do
+    test "switches to ULID mode, showing only the count field" do
+      {:ok, view, _html} = live(build_conn(), @route)
+
+      html = view |> element("button[phx-value-mode='ulid']") |> render_click()
+
+      assert find(html, "input[name='batch[count]']") != []
+      assert find(html, "input[name='batch[prefix]']") == []
+      assert find(html, "input[name='batch[start]']") == []
+      assert Floki.attribute(find(html, "input[name='batch[mode]']"), "value") == ["ulid"]
+    end
+
+    test "switches to paste mode, showing the paste textarea instead of generated fields" do
+      {:ok, view, _html} = live(build_conn(), @route)
+
+      html = view |> element("button[phx-value-mode='paste']") |> render_click()
+
+      assert find(html, "textarea[name='batch[paste]']") != []
+      assert find(html, "input[name='batch[prefix]']") == []
+      assert find(html, "input[name='batch[start]']") == []
+      assert find(html, "input[name='batch[count]']") == []
+      assert Floki.attribute(find(html, "input[name='batch[mode]']"), "value") == ["paste"]
+    end
+  end
+
+  describe "field editor" do
+    test "adds a field row" do
+      {:ok, view, _html} = live(build_conn(), @route)
+
+      html = view |> element("button[phx-click='add_field']") |> render_click()
+
+      assert find(html, "input[name='fields[1][name]']") != []
+      assert find(html, "input[name='fields[1][value]']") != []
+    end
+
+    test "removes a field row" do
+      {:ok, view, _html} = live(build_conn(), @route)
+
+      html =
+        view
+        |> element("button[phx-click='remove_field'][phx-value-index='0']")
+        |> render_click()
+
+      assert find(html, "input[name='fields[0][name]']") == []
+    end
+  end
+
   describe "sequence mode" do
     test "creates a batch with generated pattern codes and pushes the payload" do
-      {:ok, view, _html} = live(build_conn(), "/batches/new")
+      {:ok, view, _html} = live(build_conn(), @route)
 
       html =
         render_submit(view, "create_batch", %{
@@ -99,8 +144,9 @@ defmodule TaggingItWeb.BatchFormLiveTest do
                "CODEPRODUCT00000320260101"
              ]
     end
+
     test "pushed codes carry their sequence; template carries show_sequence" do
-      {:ok, view, _html} = live(build_conn(), "/batches/new")
+      {:ok, view, _html} = live(build_conn(), @route)
 
       render_submit(view, "create_batch", %{
         "batch" => %{
@@ -128,7 +174,7 @@ defmodule TaggingItWeb.BatchFormLiveTest do
     end
 
     test "generates QR codes when symbology is qrcode" do
-      {:ok, view, _html} = live(build_conn(), "/batches/new")
+      {:ok, view, _html} = live(build_conn(), @route)
 
       render_submit(view, "create_batch", %{
         "batch" => %{
@@ -153,7 +199,7 @@ defmodule TaggingItWeb.BatchFormLiveTest do
     end
 
     test "rejects an empty prefix" do
-      {:ok, view, _html} = live(build_conn(), "/batches/new")
+      {:ok, view, _html} = live(build_conn(), @route)
 
       html =
         render_submit(view, "create_batch", %{
@@ -166,7 +212,7 @@ defmodule TaggingItWeb.BatchFormLiveTest do
     end
 
     test "rejects a count of zero" do
-      {:ok, view, _html} = live(build_conn(), "/batches/new")
+      {:ok, view, _html} = live(build_conn(), @route)
 
       html =
         render_submit(view, "create_batch", %{
@@ -179,7 +225,7 @@ defmodule TaggingItWeb.BatchFormLiveTest do
     end
 
     test "creates a batch with ULID codes when mode is ulid" do
-      {:ok, view, _html} = live(build_conn(), "/batches/new")
+      {:ok, view, _html} = live(build_conn(), @route)
 
       html =
         render_submit(view, "create_batch", %{
@@ -200,7 +246,7 @@ defmodule TaggingItWeb.BatchFormLiveTest do
 
   describe "paste mode" do
     test "creates a batch from pasted code data values" do
-      {:ok, view, _html} = live(build_conn(), "/batches/new")
+      {:ok, view, _html} = live(build_conn(), @route)
 
       html =
         render_submit(view, "create_batch", %{
@@ -223,7 +269,7 @@ defmodule TaggingItWeb.BatchFormLiveTest do
     end
 
     test "rejects empty paste input" do
-      {:ok, view, _html} = live(build_conn(), "/batches/new")
+      {:ok, view, _html} = live(build_conn(), @route)
 
       html =
         render_submit(view, "create_batch", %{

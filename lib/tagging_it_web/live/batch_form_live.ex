@@ -14,6 +14,8 @@ defmodule TaggingItWeb.BatchFormLive do
 
   use TaggingItWeb, :live_view
 
+  import Phoenix.Component
+
   alias TaggingIt.Batch
   alias TaggingIt.Batch.Template
   alias TaggingIt.CodeData.{PatternStrategy, UlidStrategy}
@@ -38,6 +40,36 @@ defmodule TaggingItWeb.BatchFormLive do
     %{id: "azteccode", name: "Aztec"}
   ]
 
+  # Symbology id → display name (code chip in the nav row).
+  @names %{
+    "qrcode" => "QR Code",
+    "code128" => "Code 128",
+    "code39" => "Code 39",
+    "ean13" => "EAN-13",
+    "ean8" => "EAN-8",
+    "upca" => "UPC-A",
+    "pdf417" => "PDF417",
+    "datamatrix" => "DataMatrix",
+    "azteccode" => "Aztec"
+  }
+
+  # Input-mode pills, in render order. Keys are the internal mode values the
+  # strategies and the create_batch handler switch on — do not rename.
+  @mode_options [
+    %{id: "pattern", label: "Generate (sequence)"},
+    %{id: "ulid", label: "Generate (ULID)"},
+    %{id: "paste", label: "Paste values"}
+  ]
+
+  # Lucide icon path data (24px stroke set), keyed by the atoms above.
+  @icon_paths %{
+    arrow_left: ["M19 12H5", "m12 19-7-7 7-7"],
+    barcode: ["M3 5v14", "M8 5v14", "M12 5v14", "M17 5v14", "M21 5v14"],
+    chevron_down: ["m6 9 6 6 6-6"],
+    check: ["M20 6 9 17l-5-5"],
+    plus: ["M5 12h14", "M12 5v14"]
+  }
+
   @impl true
   def mount(params, _session, socket) do
     symbology = Map.get(params, "symbology", "code128")
@@ -59,6 +91,9 @@ defmodule TaggingItWeb.BatchFormLive do
        fields: [%Field{name: "", value: ""}],
        label_sizes: @label_sizes,
        symbologies: @symbologies,
+       mode_options: @mode_options,
+       symbology_name: Map.get(@names, symbology, symbology),
+       icon_paths: @icon_paths,
        errors: []
      )}
   end
@@ -90,7 +125,6 @@ defmodule TaggingItWeb.BatchFormLive do
             _ -> Batch.create(template)
           end
 
-        IO.inspect(result, label: "DEBUG create result")
         case result do
           {:ok, batch, codes} ->
             payload = BatchSerializer.to_wire(batch, codes)
@@ -196,5 +230,14 @@ defmodule TaggingItWeb.BatchFormLive do
       {:ok, date} -> date
       {:error, _reason} -> nil
     end
+  end
+
+  defp icon(name, class) do
+    assigns = %{name: name, class: class, paths: @icon_paths[name]}
+    ~H"""
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class={@class} aria-hidden="true">
+      <path :for={p <- @paths} d={p} />
+    </svg>
+    """
   end
 end

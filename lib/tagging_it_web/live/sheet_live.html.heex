@@ -1,97 +1,147 @@
-<div id="sheet-view" phx-hook="SheetLoader" data-batch-id={@batch_id}>
-  <%= if @error do %>
-    <div class="sheet-error" role="alert">
-      <%= @error %>
+<div
+  id="sheet-view"
+  phx-hook="SheetLoader"
+  data-batch-id={@batch_id}
+  class="min-h-screen bg-sticker-cream font-body text-sticker-ink"
+>
+  <div class="relative mx-auto flex min-h-screen w-full max-w-[420px] flex-col px-6 pb-6 pt-3.5">
+    <!-- Nav row -->
+    <div class="sheet-nav flex items-center justify-between">
+      <a
+        href="/"
+        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-white shadow-[3px_3px_0_0_rgba(43,42,61,0.15)] outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px]"
+        aria-label="Back to home"
+      >
+        {icon(:arrow_left, "h-[18px] w-[18px] text-sticker-ink")}
+      </a>
+      <h1 class="font-display text-[26px] font-extrabold text-sticker-ink">Print Preview</h1>
+      <div class="h-10 w-10 shrink-0"></div>
     </div>
-  <% else %>
-    <%= if @batch do %>
-      <div class="sheet-toolbar">
-        <strong><%= @batch["name"] %></strong>
-        <span class="sheet-meta"><%= length(@codes) %> labels · <%= @sheet.cols %>×<%= @sheet.rows %> grid</span>
-        <button type="button" class="sheet-print" onclick="window.print()">Print</button>
-        <button
-          type="button"
-          id="sheet-delete"
-          class="sheet-delete"
-          phx-hook="SheetDelete"
-          data-batch-id={@batch["id"]}
-        >
-          Delete batch
-        </button>
-      </div>
 
-      <%= if @codes == [] do %>
-        <div class="sheet-empty">No codes in this batch yet.</div>
-      <% else %>
-        <div class="sheet-stack">
-          <%= for page <- Enum.chunk_every(@codes, @sheet.capacity) do %>
-            <div class="sheet">
-              <%= for code <- page do %>
-                <div class="label" id={"label-#{code["id"]}"} data-code-data={code["code_data"]}>
-                  <div
-                    class="barcode"
-                    data-bcid={code["symbology"] || "code128"}
-                    data-text={code["code_data"]}
-                    role="img"
-                    aria-label={"Barcode #{code["code_data"]}"}
-                  ></div>
-                  <div class="lines">
-                    <%= if Map.get(@batch["template"] || %{}, "show_sequence", true) do %>
-                      <div class="line label-seq">
-                        <span class="line-name">No.</span>
-                        <span class="line-value"><%= code["sequence"] || "" %></span>
-                      </div>
-                    <% end %>
-                    <%= for field <- code["fields"] do %>
-                      <div class="line">
-                        <span class="line-name"><%= field["name"] %></span>
-                        <form
-                          id={"field-#{code["id"]}-#{field["name"]}"}
-                          class="line-form"
-                          phx-change="field:update"
-                          phx-submit="field:update"
-                          phx-value-code-id={code["id"]}
-                          phx-value-name={field["name"]}
-                        >
-                          <input
-                            type="text"
-                            name="value"
-                            data-field-name={field["name"]}
-                            value={field["value"]}
-                            class="line-input"
-                          />
-                        </form>
+    <%= if @error do %>
+      <div class="sheet-error mt-6 rounded-[20px] bg-white p-4 shadow-sticker-card outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px]" role="alert">
+        <p class="text-[15px] font-medium text-sticker-ink">Couldn't load this batch from this browser.</p>
+        <a href="/" class="mt-3 inline-block rounded-[40px] bg-sticker-yellow px-4 py-2 font-display text-sm font-semibold text-sticker-ink outline-2 outline-solid outline-sticker-ink outline-offset-[-1px]">
+          Back home
+        </a>
+      </div>
+    <% else %>
+      <%= if @batch do %>
+        <!-- Info card -->
+        <div class="sheet-info mt-6 flex w-full items-center gap-2.5 rounded-[20px] bg-white p-4 shadow-[4px_4px_0_0_rgba(43,42,61,0.1)] outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px]">
+          <h2 class="min-w-0 flex-1 truncate font-display text-[22px] font-bold text-sticker-ink">
+            <%= @batch["name"] %>
+          </h2>
+          <span class="shrink-0 text-[12.5px] font-medium text-sticker-muted">
+            <%= meta_line(@codes, @sheet, @batch) %>
+          </span>
+        </div>
+
+        <!-- Preview box -->
+        <div class="sheet-preview mt-3 h-[420px] overflow-auto rounded-[16px] bg-white p-3 shadow-sticker-card outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px]">
+          <div class="flex items-start justify-center">
+            <%= if @codes == [] do %>
+              <div class="sheet-empty py-10 text-center text-sm font-medium text-sticker-muted">
+                No codes in this batch yet.
+              </div>
+            <% else %>
+              <div class="sheet-stack">
+                <%= for page <- Enum.chunk_every(@codes, @sheet.capacity) do %>
+                  <div class="sheet">
+                    <%= for code <- page do %>
+                      <div class="label" id={"label-#{code["id"]}"} data-code-data={code["code_data"]}>
+                        <div
+                          class="barcode"
+                          data-bcid={code["symbology"] || "code128"}
+                          data-text={code["code_data"]}
+                          role="img"
+                          aria-label={"Barcode #{code["code_data"]}"}
+                        ></div>
+                        <div class="lines">
+                          <%= if Map.get(@batch["template"] || %{}, "show_sequence", true) do %>
+                            <div class="line label-seq">
+                              <span class="line-name">No.</span>
+                              <span class="line-value"><%= code["sequence"] || "" %></span>
+                            </div>
+                          <% end %>
+                          <%= for field <- code["fields"] do %>
+                            <div class="line">
+                              <span class="line-name"><%= field["name"] %></span>
+                              <form
+                                id={"field-#{code["id"]}-#{field["name"]}"}
+                                class="line-form"
+                                phx-change="field:update"
+                                phx-submit="field:update"
+                                phx-value-code-id={code["id"]}
+                                phx-value-name={field["name"]}
+                              >
+                                <input
+                                  type="text"
+                                  name="value"
+                                  data-field-name={field["name"]}
+                                  value={field["value"]}
+                                  class="line-input"
+                                />
+                              </form>
+                            </div>
+                          <% end %>
+                        </div>
                       </div>
                     <% end %>
                   </div>
-                </div>
-              <% end %>
-            </div>
-          <% end %>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Page row -->
+        <%= if @codes != [] do %>
+          <div class="sheet-page flex w-full items-center justify-center py-2.5">
+            <span class="text-[13px] font-semibold text-sticker-muted">
+              Page 1 of <%= page_count(@codes, @sheet.capacity) %>
+            </span>
+          </div>
+        <% end %>
+
+        <!-- Actions -->
+        <div class="sheet-actions mt-1 flex w-full flex-col gap-3 pb-6">
+          <button
+            type="button"
+            class="sheet-print flex w-full items-center justify-center gap-2 rounded-[40px] bg-sticker-coral p-[14px_24px] shadow-sticker outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px]"
+            onclick="window.print()"
+          >
+            {icon(:printer, "h-[18px] w-[18px] text-sticker-ink")}
+            <span class="font-display text-[18px] font-semibold text-sticker-ink">Print</span>
+          </button>
+          <button
+            type="button"
+            id="sheet-delete"
+            class="sheet-delete flex w-full items-center justify-center gap-2 rounded-[40px] bg-white p-[14px_24px] outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px]"
+            phx-hook="SheetDelete"
+            data-batch-id={@batch["id"]}
+          >
+            {icon(:trash_2, "h-[18px] w-[18px] text-sticker-coral")}
+            <span class="font-display text-[18px] font-semibold text-sticker-coral">Delete batch</span>
+          </button>
+        </div>
+      <% else %>
+        <div class="sheet-loading py-24 text-center text-sm font-medium text-sticker-muted">
+          Loading sheet…
         </div>
       <% end %>
-    <% else %>
-      <div class="sheet-loading">Loading sheet…</div>
     <% end %>
-  <% end %>
+  </div>
 </div>
 
 <style>
   /* SheetView print flow — variant B full-sheet grid + variant C live field editing (#9).
      Geometry per docs/research/print-layout.md: Avery 5160, letter sheet, 3×10 grid,
-     labels 2.625in × 1in; @page letter, margin 0. */
-  #sheet-view { font-family: system-ui, -apple-system, sans-serif; }
-  #sheet-view .sheet-error,
-  #sheet-view .sheet-loading,
-  #sheet-view .sheet-empty { color: #6b7280; padding: 24px; text-align: center; }
-  #sheet-view .sheet-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-  #sheet-view .sheet-toolbar strong { font-size: 15px; }
-  #sheet-view .sheet-meta { font-size: 12px; color: #6b7280; }
-  #sheet-view .sheet-print { margin-left: auto; font-size: 13px; padding: 6px 14px; border: 1px solid #2563eb; border-radius: 6px; background: #2563eb; color: #fff; cursor: pointer; }
-  #sheet-view .sheet-delete { font-size: 13px; padding: 6px 14px; border: 1px solid #e03131; border-radius: 6px; background: #fff; color: #e03131; cursor: pointer; }
-  #sheet-view .sheet-delete:hover { background: #e03131; color: #fff; }
+     labels 2.625in × 1in; @page letter, margin 0.
+     Screen chrome (nav/info/page/actions/preview frame) is Tailwind-styled; this
+     block only carries the print-critical label-sheet geometry and print rules. */
+  #sheet-view .sheet { width: 8.5in; min-height: 11in; margin: 0 auto 24px; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); box-sizing: border-box; padding: 0.5in 0.3125in; display: flex; flex-wrap: wrap; align-content: flex-start; font-family: system-ui, -apple-system, sans-serif; }
   #sheet-view .sheet-stack { overflow-x: auto; }
-  #sheet-view .sheet { width: 8.5in; min-height: 11in; margin: 0 auto 24px; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); box-sizing: border-box; padding: 0.5in 0.3125in; display: flex; flex-wrap: wrap; align-content: flex-start; }
   #sheet-view .label { width: 2.625in; height: 1in; box-sizing: border-box; padding: 2px 4px; display: flex; flex-direction: column; justify-content: center; gap: 1px; font-size: 9px; break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; border-bottom: 1px dotted #e5e7eb; }
   #sheet-view .barcode { text-align: center; }
   #sheet-view .barcode svg { max-width: 100%; height: auto; }
@@ -106,7 +156,11 @@
     body > header { display: none !important; }
     main { padding: 0 !important; }
     main > div { max-width: none !important; }
-    #sheet-view .sheet-toolbar, #sheet-view .sheet-meta { display: none !important; }
+    #sheet-view .sheet-nav,
+    #sheet-view .sheet-info,
+    #sheet-view .sheet-page,
+    #sheet-view .sheet-actions { display: none !important; }
+    #sheet-view .sheet-preview { height: auto !important; overflow: visible !important; padding: 0 !important; background: transparent !important; box-shadow: none !important; outline: none !important; border-radius: 0 !important; }
     #sheet-view .sheet-stack { overflow: visible; }
     #sheet-view .sheet { margin: 0; box-shadow: none; border: none; }
     #sheet-view .label { border: none; }

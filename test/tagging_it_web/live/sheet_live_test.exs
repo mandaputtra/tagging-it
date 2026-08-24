@@ -15,6 +15,13 @@ defmodule TaggingItWeb.SheetLiveTest do
       assert html =~ "Loading sheet"
       assert find(html, ".sheet-loading") != []
     end
+
+    test "renders the Print Preview nav with a back link and title" do
+      {:ok, _view, html} = live(build_conn(), "/sheet/batch-1")
+
+      assert text(html) =~ "Print Preview"
+      assert find(html, ~s(a[href="/"])) != []
+    end
   end
 
   describe "sheet:loaded" do
@@ -41,6 +48,39 @@ defmodule TaggingItWeb.SheetLiveTest do
           assert Floki.attribute(input, "value") == [field.value]
         end
       end
+    end
+
+    test "renders the info card, page row, and actions once the batch loads" do
+      {:ok, view, _html} = live(build_conn(), "/sheet/batch-1")
+      {batch, codes} = sample_sheet()
+
+      html = render_click(view, "sheet:loaded", %{"batch" => wire(batch), "codes" => wire(codes)})
+
+      # info card: batch name + meta line (labels · grid · symbology)
+      assert text(html) =~ batch.name
+      assert text(html) =~ "3 labels · 3×10 grid · Code 128"
+
+      # page row: 3 codes fit one 30-capacity sheet
+      assert text(html) =~ "Page 1 of 1"
+
+      # actions: print + delete
+      assert find(html, ".sheet-print") != []
+      assert find(html, "#sheet-delete") != []
+      assert text(html) =~ "Print"
+      assert text(html) =~ "Delete batch"
+
+      # the print sheet markup still renders inside the preview
+      assert find(html, ".sheet") != []
+    end
+
+    test "shows an error card with a link home when the payload is invalid" do
+      {:ok, view, _html} = live(build_conn(), "/sheet/batch-1")
+
+      html = render_click(view, "sheet:loaded", %{"batch" => %{"id" => ""}, "codes" => []})
+
+      assert find(html, ".sheet-error") != []
+      assert text(html) =~ "Couldn't load this batch from this browser."
+      assert find(html, ~s(a[href="/"])) != []
     end
 
     test "shows an empty state when the batch has no codes" do

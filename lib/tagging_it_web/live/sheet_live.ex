@@ -8,11 +8,15 @@ defmodule TaggingItWeb.SheetLive do
   print-ready label sheet (Avery 5160 geometry per docs/research/print-layout.md).
   Field values are edited live with `TaggingIt.Fields.resolve` semantics.
 
-  Void states: loading on mount, an empty state for a batch with no codes, and
-  an error message (no crash) for an invalid payload.
+  UI follows the pen.dev Print Preview design: a sticker-style shell around a
+  scrollable live preview of the label sheets. Void states: loading on mount, an
+  empty state for a batch with no codes, and an error message (no crash) for an
+  invalid payload.
   """
 
   use TaggingItWeb, :live_view
+
+  import Phoenix.Component
 
   alias TaggingIt.Fields
   alias TaggingIt.Fields.Field
@@ -23,6 +27,36 @@ defmodule TaggingItWeb.SheetLive do
   @sheet_cols 3
   @sheet_rows 10
 
+  # Symbology id → display name (for the info-card meta line).
+  @names %{
+    "qrcode" => "QR Code",
+    "code128" => "Code 128",
+    "code39" => "Code 39",
+    "ean13" => "EAN-13",
+    "ean8" => "EAN-8",
+    "upca" => "UPC-A",
+    "pdf417" => "PDF417",
+    "datamatrix" => "DataMatrix",
+    "azteccode" => "Aztec"
+  }
+
+  # Lucide icon path data (24px stroke set), keyed by the atoms above.
+  @icon_paths %{
+    arrow_left: ["M19 12H5", "m12 19-7-7 7-7"],
+    printer: [
+      "M6 9V2h12v7",
+      "M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2",
+      "M6 14h12v8a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1z"
+    ],
+    trash_2: [
+      "M3 6h18",
+      "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6",
+      "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2",
+      "M10 11v6",
+      "M14 11v6"
+    ]
+  }
+
   @impl true
   def mount(%{"batch_id" => batch_id}, _session, socket) do
     {:ok,
@@ -31,6 +65,7 @@ defmodule TaggingItWeb.SheetLive do
        batch: nil,
        codes: [],
        error: nil,
+       icon_paths: @icon_paths,
        sheet: %{cols: @sheet_cols, rows: @sheet_rows, capacity: @sheet_capacity}
      )}
   end
@@ -42,6 +77,7 @@ defmodule TaggingItWeb.SheetLive do
        batch: nil,
        codes: [],
        error: nil,
+       icon_paths: @icon_paths,
        sheet: %{cols: @sheet_cols, rows: @sheet_rows, capacity: @sheet_capacity}
      )}
   end
@@ -110,4 +146,36 @@ defmodule TaggingItWeb.SheetLive do
   end
 
   defp valid_codes?(_), do: false
+
+  defp icon(name, class) do
+    assigns = %{name: name, class: class, paths: @icon_paths[name]}
+    ~H"""
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class={@class} aria-hidden="true">
+      <path :for={p <- @paths} d={p} />
+    </svg>
+    """
+  end
+
+  # "3 labels · 3×10 grid" plus " · Symbology Name" when the template has one.
+  defp meta_line(codes, sheet, batch) do
+    base = "#{length(codes)} labels · #{sheet.cols}×#{sheet.rows} grid"
+
+    case symbology_name(batch) do
+      "" -> base
+      name -> base <> " · " <> name
+    end
+  end
+
+  defp symbology_name(batch) do
+    case get_in(batch || %{}, ["template", "symbology"]) do
+      nil -> ""
+      sym -> Map.get(@names, sym, sym)
+    end
+  end
+
+  defp page_count(codes, capacity) when capacity > 0 do
+    max(1, div(length(codes) + capacity - 1, capacity))
+  end
+
+  defp page_count(_codes, _capacity), do: 1
 end

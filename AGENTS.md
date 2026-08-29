@@ -4,9 +4,10 @@ Freemium QR/barcode generator: create codes one-by-one or in bulk, each with a u
 
 ## Workflow directives (user standing preferences)
 
-- **TDD first**: write failing unit tests before implementation. Follow Phoenix testing best practices: https://phoenix.hexdocs.pm/testing.html
-- **Call-graph before every plan**: read `/call-graph` skill and draw the data flow graph before designing or building any non-trivial flow. Code must match the graph.
+- **TDD first**: write failing unit tests before implementation. Follow Phoenix testing best practices: https://phoenix.hexdocs.ph/testing.html
+- **Call-graph before every plan**: read `.agents/skills/call-graph/SKILL.md` and draw the data-flow graph (A → E → R) before designing or building any non-trivial flow. Output format: plain `ts` block, indented `→` arrows, Production + Tests sections. Code must match the graph.
 - **Wayfinder**: this project is charted on GitHub issues. The map is issue #1 (`wayfinder:map` label); tickets are its sub-issues (`wayfinder:research|grilling|prototype|task` labels). Work one ticket per session; claim (assign to yourself) before starting. See the wayfinder skill.
+- **Ponytail (always on)**: before writing any code, stop at the first rung that holds: (1) does this need to exist at all? (2) already in codebase? reuse it. (3) stdlib? use it. (4) native platform feature? use it. (5) already-installed dep? use it. (6) one line? one line. (7) only then: minimum that works. No unrequested abstractions, no boilerplate. Deletion over addition. See `.agents/skills/ponytail/SKILL.md` for full rules.
 
 ## Stack
 
@@ -60,3 +61,33 @@ Copy of Notion's design analysis at `docs/notion-DESIGN.md` (not a literal Notio
 - `premium-architecture.md` (#6) — auth, Stripe, sync endpoints
 
 Update these when decisions change; they are the source of the table above.
+
+## Skills
+
+Installed in `.agents/skills/` — read the relevant `SKILL.md` before using:
+
+| Skill | Source | Purpose |
+|---|---|---|
+| `call-graph` | r17x/gist (DESIGN_THINKING) | Draw A→E→R call graphs before every plan |
+| `ponytail` | DietrichGebert/ponytail | Lazy senior dev: YAGNI ladder, minimal diffs |
+| `wayfinder` | mattpocock/skills | GitHub issue wayfinding & ticket claims |
+| `tdd` | mattpocock/skills | Test-driven development workflow |
+| `implement` | mattpocock/skills | Structured implementation flow |
+| `research` | mattpocock/skills | Research before building |
+| `prototype` | mattpocock/skills | Throwaway prototype flow |
+| `code-review` | mattpocock/skills | Structured code review |
+| `diagnosing-bugs` | mattpocock/skills | Root-cause bug triage |
+| `domain-modeling` | mattpocock/skills | Domain language + shape design |
+| `codebase-design` | mattpocock/skills | Codebase architecture review |
+| `improve-codebase-architecture` | mattpocock/skills | Architecture improvement |
+| `to-spec` | mattpocock/skills | Spec writing |
+| `to-tickets` | mattpocock/skills | Break work into tickets |
+| `triage` | mattpocock/skills | Triage incoming requests |
+| `grill-me` | mattpocock/skills | Interactive design interview |
+| `grilling` | mattpocock/skills | Grilling session |
+| `handoff` | mattpocock/skills | Session handoff notes |
+| `retro` | mattpocock/skills | Retrospective |
+| `wizard` | mattpocock/skills | Step-by-step guided setup |
+| `ask-matt` | mattpocock/skills | Ask-Matt advisory mode |
+
+Full list: `.agents/skills/` (37 skills from mattpocock/skills, 2 custom).

@@ -29,3 +29,10 @@ tagging_it-*.tar
 # Node modules (assets/)
 /assets/node_modules/
 dbeaver-mcp.log
+
+# IDE / editor settings (machine-specific, not for version control)
+.vscode/
+
+# AI agents
+.agents/
+skills-lock.json

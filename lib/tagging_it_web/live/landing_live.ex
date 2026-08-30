@@ -176,6 +176,14 @@ defmodule TaggingItWeb.LandingLive do
             <span class="font-display text-lg font-semibold text-sticker-ink">Create batch</span>
           </a>
 
+          <a
+            href="/codes/new"
+            class="flex items-center gap-2 rounded-[40px] bg-white px-6 py-3 shadow-sticker-soft outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px] transition-transform hover:-translate-y-0.5"
+          >
+            {icon(:qr, "h-[16px] w-[16px] text-sticker-ink")}
+            <span class="font-display text-[15px] font-semibold text-sticker-ink">Create single code</span>
+          </a>
+
           <p class="text-[11.5px] font-medium text-sticker-muted">
             Free · Private · In your browser
           </p>

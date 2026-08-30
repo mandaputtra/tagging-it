@@ -98,6 +98,13 @@ defmodule TaggingItWeb.ChooseTypeLive do
           </div>
         </header>
 
+        <a
+          href="/codes/new"
+          class="flex items-center justify-center gap-2 rounded-[40px] bg-white px-4 py-3 text-sm font-semibold text-sticker-ink shadow-sticker-card outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px]"
+        >
+          Need just one? Create a single code →
+        </a>
+
         <!-- Code list -->
         <ul class="flex flex-col gap-[14px]">
           <li :for={card <- @cards} class="code-card">

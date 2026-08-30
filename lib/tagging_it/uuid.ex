@@ -30,7 +30,7 @@ defmodule TaggingIt.UUID do
   # `bits` random bits as an integer, from a byte-aligned buffer.
   defp random(bits) do
     bytes = div(bits + 7, 8)
-    <<r::size(^bits), _::size(bytes * 8 - bits)>> = :crypto.strong_rand_bytes(bytes)
+    <<r::size(^bits), _::size(^bytes * 8 - ^bits)>> = :crypto.strong_rand_bytes(bytes)
     r
   end
 

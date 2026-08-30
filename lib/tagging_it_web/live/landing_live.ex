@@ -168,27 +168,27 @@ defmodule TaggingItWeb.LandingLive do
             </div>
           </div>
 
-          <a
-            href="/batches/new"
-            class="mt-2 flex items-center gap-2 rounded-[40px] bg-sticker-coral px-7 py-3.5 shadow-sticker outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px] transition-transform hover:-translate-y-0.5"
-          >
-            {icon(:plus, "h-[18px] w-[18px] text-sticker-ink")}
-            <span class="font-display text-lg font-semibold text-sticker-ink">Create batch</span>
-          </a>
-
-          <a
-            href="/codes/new"
-            class="flex items-center gap-2 rounded-[40px] bg-white px-6 py-3 shadow-sticker-soft outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px] transition-transform hover:-translate-y-0.5"
-          >
-            {icon(:qr, "h-[16px] w-[16px] text-sticker-ink")}
-            <span class="font-display text-[15px] font-semibold text-sticker-ink">Create single code</span>
-          </a>
+          <div class="flex w-full flex-col gap-5">
+            <a
+              href="/codes/new"
+              class="flex w-full items-center justify-center gap-[10px] rounded-[40px] bg-sticker-coral px-8 py-4 shadow-sticker outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px] transition-transform hover:-translate-y-0.5"
+            >
+              {icon(:qr, "h-[22px] w-[22px] text-sticker-ink")}
+              <span class="font-display text-[21px] font-semibold text-sticker-ink">Generate a code</span>
+            </a>
+            <a
+              href="/batches/new"
+              class="mx-auto flex w-[190px] items-center justify-center gap-2 rounded-[40px] bg-white px-6 py-2.5 shadow-sticker-soft outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px] transition-transform hover:-translate-y-0.5"
+            >
+              {icon(:plus, "h-4 w-4 text-sticker-ink")}
+              <span class="font-display text-[16px] font-semibold text-sticker-ink">Create batch</span>
+            </a>
+          </div>
 
           <p class="text-[11.5px] font-medium text-sticker-muted">
             Free · Private · In your browser
           </p>
         </header>
-
         <!-- Recent batches -->
         <section id="recent-batches" class="relative flex flex-col gap-3.5">
           <svg class="absolute -left-3 -top-8 h-6 w-6 rotate-[8deg] text-sticker-yellow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

@@ -7,14 +7,15 @@ import Config
 # watchers to your application. For example, we can use it
 # to bundle .js and .css sources.
 config :tagging_it, TaggingItWeb.Endpoint,
-  # Binding to loopback ipv4 address prevents access from other machines.
-  # Change to `ip: {0, 0, 0, 0}` to allow access from other machines.
   http: [ip: {127, 0, 0, 1}, port: 4000],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,
   secret_key_base: "swIMVjyZtS/SSv/lGZY/Qv0CvKhaU4ojRoUxI1afkctCDN3uZX5AGnyQ5IN/mSBY",
-  watchers: []
+  watchers: [
+    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
+    npx: ~w(tailwindcss -i css/app.css -o ../priv/static/assets/app.css --watch) ++ [cd: Path.expand("../assets", __DIR__)]
+  ]
 
 # ## SSL Support
 #

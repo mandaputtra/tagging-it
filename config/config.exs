@@ -38,12 +38,12 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-# Asset build (esbuild). Bundle assets/js/app.js → priv/static/assets/app.js.
+# Asset build (esbuild). Bundle assets/js/app.ts → priv/static/assets/app.js.
 config :esbuild,
   version: "0.27.0",
   default: [
-    args: ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --format=esm --sourcemap),
-    cd: "assets",
+    args: ~w(js/app.ts --bundle --target=es2017 --outdir=../priv/static/assets --format=esm --sourcemap),
+    cd: Path.expand("../assets", __DIR__),
     env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
   ]
 

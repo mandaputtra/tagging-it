@@ -8,9 +8,7 @@
     "css": "tailwindcss -i css/app.css -o ../priv/static/assets/app.css --minify",
     "css:watch": "tailwindcss -i css/app.css -o ../priv/static/assets/app.css --watch",
     "build": "tsc --noEmit && npm run css && esbuild js/app.ts --bundle --outdir=../priv/static/assets --target=es2017 --format=esm --sourcemap",
-    "deploy": "npm run build",
-    "dev": "concurrently -n css,phx -c cyan,magenta \"npm:css:watch\" \"npm:mix:server\"",
-    "mix:server": "cd .. && mix phx.server"
+    "deploy": "npm run build"
   },
   "dependencies": {
     "bwip-js": "^4.11.4",
@@ -21,7 +19,6 @@
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.3",
-    "concurrently": "^9.1.2",
     "esbuild": "^0.27.0",
     "fake-indexeddb": "^6.2.5",
     "happy-dom": "^20.11.6",

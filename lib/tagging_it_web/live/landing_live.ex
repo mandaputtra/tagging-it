@@ -208,7 +208,7 @@ defmodule TaggingItWeb.LandingLive do
             <ul class="flex flex-col gap-3">
               <li :for={batch <- @recent_batches} class="recent-row">
                 <a
-                  href={"/sheet/" <> batch["id"]}
+                  href={"/batches/" <> batch["id"]}
                   class="flex items-center gap-3 rounded-[20px] bg-white p-3.5 shadow-sticker-card outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px] transition-transform hover:-translate-y-0.5"
                 >
                   {icon_bubble(batch["symbology"])}

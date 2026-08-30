@@ -9744,6 +9744,14 @@ function renderBarcodes(container, toSvg) {
   });
 }
 
+// js/batch_detail.ts
+function buildBatchDetailPayload(batch, codes) {
+  if (codes.some((code) => code.batch_id !== batch.id)) {
+    throw new Error("codes reference a different batch than the one loaded");
+  }
+  return { batch, codes };
+}
+
 // js/recent_batches.ts
 var MAX_RECENT = 6;
 function recentBatchesPayload(batches) {
@@ -58978,6 +58986,19 @@ Hooks2.SheetLoader = {
   },
   updated() {
     renderBarcodes(this.el, (opts) => ToSVG(opts));
+  }
+};
+Hooks2.BatchDetailLoader = {
+  async mounted() {
+    const batchId = this.el.dataset.batchId;
+    if (!batchId) return;
+    try {
+      const [batch, codes] = await Promise.all([getBatch(batchId), codesByBatch(batchId)]);
+      if (!batch) return;
+      this.pushEvent("detail:loaded", buildBatchDetailPayload(batch, codes));
+    } catch (err) {
+      console.error("BatchDetailLoader: failed to load batch from store", err);
+    }
   }
 };
 var _a;

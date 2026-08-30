@@ -5,6 +5,7 @@ import { LiveSocket, type Hook } from "phoenix_live_view";
 import { getBatch, codesByBatch } from "./batch_store.js";
 import { persistAndGo, deleteBatchAndRefresh } from "./batch_creator.js";
 import { buildSheetPayload, renderBarcodes } from "./sheet_bridge.js";
+import { buildBatchDetailPayload } from "./batch_detail.js";
 import { RecentBatches, recentBatchesPayload } from "./recent_batches.js";
 import { toSVG } from "bwip-js/browser";
 import type { BatchCreatedWire } from "./types.js";
@@ -69,7 +70,6 @@ Hooks.BatchCreator = {
     });
   },
 };
-
 // SheetView: free tier is browser-only. On mount, read the batch + codes from
 // IndexedDB and push them to SheetLive; after each morph, draw the barcode SVGs.
 Hooks.SheetLoader = {
@@ -92,6 +92,22 @@ Hooks.SheetLoader = {
     renderBarcodes(this.el, (opts) => toSVG(opts));
   },
 };
+
+// BatchDetail: same store bridge but for the detail view (per #18/#20).
+Hooks.BatchDetailLoader = {
+  async mounted() {
+    const batchId = this.el.dataset.batchId;
+    if (!batchId) return;
+    try {
+      const [batch, codes] = await Promise.all([getBatch(batchId), codesByBatch(batchId)]);
+      if (!batch) return;
+      this.pushEvent("detail:loaded", buildBatchDetailPayload(batch, codes));
+    } catch (err) {
+      console.error("BatchDetailLoader: failed to load batch from store", err);
+    }
+  },
+};
+
 
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")

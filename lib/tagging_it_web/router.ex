@@ -28,6 +28,7 @@ defmodule TaggingItWeb.Router do
     live "/sheet/:batch_id", SheetLive
     live "/batches/new", ChooseTypeLive
     live "/batches/new/:symbology", BatchFormLive
+    live "/batches/:batch_id", BatchDetailLive
   end
 
   # Other scopes may use custom stacks.

@@ -73,9 +73,14 @@ export interface BatchCreatedWire {
   batch: BatchRecord;
   codes: CodeRecord[];
 }
-
 /** Payload for the `sheet:loaded` event pushed to SheetLive. */
 export interface SheetLoadedWire {
+  batch: BatchRecord;
+  codes: CodeRecord[];
+}
+
+/** Payload for the `detail:loaded` event pushed to BatchDetailLive. */
+export interface BatchDetailWire {
   batch: BatchRecord;
   codes: CodeRecord[];
 }

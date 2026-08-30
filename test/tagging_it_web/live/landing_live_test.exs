@@ -53,8 +53,8 @@ defmodule TaggingItWeb.LandingLiveTest do
     assert text(html) =~ "WiFi guest cards"
     assert text(html) =~ "QR Code · 12 labels"
     assert text(html) =~ "Aug 20"
-    assert find(html, "a[href='/sheet/b-1']") != []
-    assert find(html, "a[href='/sheet/b-2']") != []
+    assert find(html, "a[href='/batches/b-1']") != []
+    assert find(html, "a[href='/batches/b-2']") != []
   end
 
   test "renders a void state for recent batches before the client reports" do

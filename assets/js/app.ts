@@ -3,7 +3,7 @@
 import { Socket } from "phoenix";
 import { LiveSocket, type Hook } from "phoenix_live_view";
 import { getBatch, codesByBatch, getCode, codesByValue } from "./batch_store.js";
-import { persistAndGo, deleteBatchAndRefresh } from "./batch_creator.js";
+import { persistAndGo, persistAndGoDetail, deleteBatchAndRefresh } from "./batch_creator.js";
 import { buildSheetPayload, renderBarcodes } from "./sheet_bridge.js";
 import { buildBatchDetailPayload } from "./batch_detail.js";
 import { RecentBatches, recentBatchesPayload } from "./recent_batches.js";
@@ -66,6 +66,18 @@ Hooks.BatchCreator = {
         await persistAndGo(batch, codes);
       } catch (err) {
         console.error("BatchCreator: failed to persist batch", err);
+      }
+    });
+  },
+};
+// SingleCode: same handoff but navigates to Detail per #18 (own route, count=1).
+Hooks.SingleCodeCreator = {
+  mounted() {
+    this.handleEvent("batch:created", async ({ batch, codes }: BatchCreatedWire) => {
+      try {
+        await persistAndGoDetail(batch, codes);
+      } catch (err) {
+        console.error("SingleCodeCreator: failed to persist batch", err);
       }
     });
   },

@@ -26,3 +26,15 @@ export async function persistAndGo(batch: BatchRecord, codes: CodeRecord[]): Pro
   await putCodes(codes);
   window.location.href = `/sheet/${batch.id}`;
 }
+
+/**
+ * Persists a single-code batch + codes and navigates to its detail (per #18).
+ */
+export async function persistAndGoDetail(batch: BatchRecord, codes: CodeRecord[]): Promise<void> {
+  if (!batch?.id) throw new Error("persistAndGoDetail: missing batch");
+  if (!Array.isArray(codes)) throw new Error("persistAndGoDetail: codes must be a list");
+
+  await putBatch(batch);
+  await putCodes(codes);
+  window.location.href = `/batches/${batch.id}`;
+}

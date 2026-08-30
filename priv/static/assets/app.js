@@ -9742,6 +9742,13 @@ async function persistAndGo(batch, codes) {
   await putCodes(codes);
   window.location.href = `/sheet/${batch.id}`;
 }
+async function persistAndGoDetail(batch, codes) {
+  if (!(batch == null ? void 0 : batch.id)) throw new Error("persistAndGoDetail: missing batch");
+  if (!Array.isArray(codes)) throw new Error("persistAndGoDetail: codes must be a list");
+  await putBatch(batch);
+  await putCodes(codes);
+  window.location.href = `/batches/${batch.id}`;
+}
 
 // js/sheet_bridge.ts
 function buildSheetPayload(batch, codes) {
@@ -58986,6 +58993,17 @@ Hooks2.BatchCreator = {
         await persistAndGo(batch, codes);
       } catch (err) {
         console.error("BatchCreator: failed to persist batch", err);
+      }
+    });
+  }
+};
+Hooks2.SingleCodeCreator = {
+  mounted() {
+    this.handleEvent("batch:created", async ({ batch, codes }) => {
+      try {
+        await persistAndGoDetail(batch, codes);
+      } catch (err) {
+        console.error("SingleCodeCreator: failed to persist batch", err);
       }
     });
   }

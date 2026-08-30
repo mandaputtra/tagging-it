@@ -1,0 +1,68 @@
+<div id="single-code-view" phx-hook="SingleCodeCreator" class="min-h-screen bg-sticker-cream font-body text-sticker-ink">
+  <div class="relative mx-auto flex min-h-screen w-full max-w-[420px] flex-col px-6 pb-6 pt-3.5">
+    <div class="flex items-center justify-between">
+      <a href="/batches/new" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-white shadow-[3px_3px_0_0_rgba(43,42,61,0.15)] outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px]" aria-label="Back">
+        {icon(:arrow_left, "h-[18px] w-[18px] text-sticker-ink")}
+      </a>
+      <h1 class="font-display text-[22px] font-extrabold text-sticker-ink">Create Code</h1>
+      <div class="h-10 w-10 shrink-0"></div>
+    </div>
+
+    <div class="mt-1 flex items-center justify-center gap-2 text-[12px] font-semibold text-sticker-muted">
+      {icon(:qr, "h-4 w-4 text-sticker-ink")}
+      <span><%= @symbology_name %></span>
+    </div>
+
+    <%= if @errors != [] do %>
+      <div class="mt-4 rounded-[16px] bg-rose-50 p-3 outline-2 outline-solid outline-rose-200" role="alert">
+        <p :for={err <- @errors} class="text-sm text-rose-700"><%= err %></p>
+      </div>
+    <% end %>
+
+    <form phx-submit="create_single" class="mt-4 flex flex-col gap-4">
+      <!-- Batch name -->
+      <label class="flex flex-col gap-1.5">
+        <span class="text-[13px] font-semibold text-sticker-ink">Batch name</span>
+        <input type="text" name="batch[name]" value={@form.name} placeholder="My single label" class="rounded-[12px] border-2 border-sticker-ink px-3 py-2.5 text-sm outline-none focus:border-sticker-coral" />
+      </label>
+
+      <!-- Symbology -->
+      <label class="flex flex-col gap-1.5">
+        <span class="text-[13px] font-semibold text-sticker-ink">Symbology</span>
+        <select name="batch[symbology]" class="rounded-[12px] border-2 border-sticker-ink px-3 py-2.5 text-sm outline-none">
+          <option :for={s <- @symbologies} value={s.id} selected={s.id == @form.symbology}><%= s.name %></option>
+        </select>
+      </label>
+
+      <!-- Value -->
+      <label class="flex flex-col gap-1.5">
+        <span class="text-[13px] font-semibold text-sticker-ink">Value</span>
+        <input type="text" name="batch[value]" value={@form.value} placeholder="CODE-001" class="rounded-[12px] border-2 border-sticker-ink px-3 py-2.5 font-mono text-sm outline-none focus:border-sticker-coral" />
+        <span class="text-[11px] text-sticker-muted">What the barcode encodes — defaults to Sequence per #14.</span>
+      </label>
+
+      <!-- Label size -->
+      <label class="flex flex-col gap-1.5">
+        <span class="text-[13px] font-semibold text-sticker-ink">Label size</span>
+        <select name="batch[label_size]" class="rounded-[12px] border-2 border-sticker-ink px-3 py-2.5 text-sm outline-none">
+          <option :for={ls <- @label_sizes} value={ls.id} selected={ls.id == @form.label_size}><%= ls.name %></option>
+        </select>
+      </label>
+
+      <!-- Fields -->
+      <div class="flex flex-col gap-2 rounded-[16px] bg-white p-3 outline-3 outline-solid outline-sticker-ink">
+        <span class="text-[13px] font-semibold">Fields</span>
+        <div :for={{field, idx} <- Enum.with_index(@fields)} class="flex gap-2">
+          <input type="text" name={"fields[#{idx}][name]"} value={field.name} placeholder="Name" class="flex-1 rounded-[10px] border-2 border-sticker-ink px-2 py-2 text-sm" />
+          <input type="text" name={"fields[#{idx}][value]"} value={field.value} placeholder="Value" class="flex-1 rounded-[10px] border-2 border-sticker-ink px-2 py-2 text-sm" />
+        </div>
+        <span class="text-[11px] text-sticker-muted">Free-form name/value pairs — per #7, resolved per code.</span>
+      </div>
+
+      <button type="submit" class="mt-2 flex items-center justify-center gap-2 rounded-[40px] bg-sticker-coral py-3 font-display text-[16px] font-semibold text-sticker-ink shadow-sticker outline-3 outline-solid outline-sticker-ink">
+        {icon(:plus, "h-5 w-5 text-sticker-ink")}
+        <span>Create single</span>
+      </button>
+    </form>
+  </div>
+</div>

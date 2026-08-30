@@ -1,0 +1,76 @@
+<!-- PROTOTYPE (#21): scan + verified flow. Three variants, ?variant=A|B|C. Throwaway. -->
+<div id="proto-scan">
+  <%= if @variant == "A" do %>
+    <%= raw(@variant_a) %>
+  <% end %>
+  <%= if @variant == "B" do %>
+    <%= raw(@variant_b) %>
+  <% end %>
+  <%= if @variant == "C" do %>
+    <%= raw(@variant_c) %>
+  <% end %>
+
+  <div class="proto-switcher" aria-label="Prototype variant switcher">
+    <button type="button" onclick="__protoVariant.prev()" aria-label="Previous variant">‹</button>
+    <span class="lbl">Variant {@variant} — Scan + Verified</span>
+    <button type="button" onclick="__protoVariant.next()" aria-label="Next variant">›</button>
+  </div>
+</div>
+
+<script>
+  window.__renderBarcode = function (el, opts) {
+    if (typeof bwipjs === "undefined") return;
+    var svg = bwipjs.toSVG(Object.assign({
+      bcid: opts.bcid || "code128",
+      text: opts.text,
+      scale: opts.scale || 3,
+      height: opts.height || 12,
+      includetext: false,
+      textxalign: "center"
+    }, opts.extra || {}));
+    el.innerHTML = svg;
+  };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/bwip-js@4.11.4/dist/bwip-js-min.js"></script>
+<script>
+  (function () {
+    function renderAll() {
+      document.querySelectorAll("[data-bcid]").forEach(function (el) {
+        if (el.dataset.rendered) return;
+        try { window.__renderBarcode(el, { bcid: el.dataset.bcid, text: el.dataset.text }); el.dataset.rendered = "1"; } catch (e) { el.textContent = "barcode error: " + e.message; }
+      });
+    }
+    if (typeof bwipjs !== "undefined") renderAll(); else window.addEventListener("load", renderAll);
+  })();
+</script>
+<script>
+  (function () {
+    var KEYS = ["A", "B", "C"];
+    function current() { return new URLSearchParams(window.location.search).get("variant") || "A"; }
+    function go(v) { var url = new URL(window.location.href); url.searchParams.set("variant", v); window.location.href = url.toString(); }
+    window.__protoVariant = {
+      go: go, current: current,
+      prev: function () { var i = KEYS.indexOf(current()); go(KEYS[(i + 2) % KEYS.length]); },
+      next: function () { var i = KEYS.indexOf(current()); go(KEYS[(i + 1) % KEYS.length]); }
+    };
+    document.addEventListener("keydown", function (e) {
+      if (e.target.matches("input, textarea, [contenteditable]")) return;
+      var i = KEYS.indexOf(current());
+      if (e.key === "ArrowRight") { e.preventDefault(); go(KEYS[(i + 1) % KEYS.length]); }
+      if (e.key === "ArrowLeft") { e.preventDefault(); go(KEYS[(i + 2) % KEYS.length]); }
+    });
+  })();
+  // Demo popup toggle
+  window.__demoMiss = function (show) {
+    var m = document.getElementById("demo-miss");
+    if (m) m.style.display = show ? "flex" : "none";
+  };
+</script>
+
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; margin: 0; background: #f3f4f6; }
+  .proto-switcher { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: #111827; color: #fff; border-radius: 999px; padding: 6px 10px; display: flex; gap: 10px; align-items: center; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,.3); z-index: 100; }
+  .proto-switcher button { background: #374151; border: none; color: #fff; border-radius: 999px; width: 28px; height: 28px; cursor: pointer; }
+  .proto-switcher .lbl { min-width: 160px; text-align: center; }
+  .sticker-cream { background: #fdf6ec; }
+</style>

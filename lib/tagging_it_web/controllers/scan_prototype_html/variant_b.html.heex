@@ -1,0 +1,37 @@
+<!-- Variant B: input-only (no camera) -->
+<div class="min-h-screen sticker-cream flex justify-center py-8">
+  <div class="w-full max-w-[420px] px-6 flex flex-col gap-4">
+    <div class="flex items-center justify-between">
+      <a href="/" class="flex h-10 w-10 items-center justify-center rounded-[12px] bg-white outline-3 outline-solid outline-sticker-ink">‹</a>
+      <h1 class="font-display text-[22px] font-extrabold">Scan Label — B (input only)</h1>
+      <div class="h-10 w-10"></div>
+    </div>
+    <p class="text-[11px] font-semibold tracking-widest text-sticker-muted">VARIANT B — INPUT-ONLY, NO CAMERA</p>
+    <div class="rounded-[20px] bg-white p-4 outline-3 outline-solid outline-sticker-ink">
+      <p class="text-sm font-medium">Use a USB scanner or type the printed value. No camera permission.</p>
+      <div class="mt-3 flex gap-2">
+        <input autofocus class="flex-1 rounded-[12px] border-2 border-sticker-ink px-3 py-3 font-mono text-sm" placeholder="Scan or type code…" value="" />
+        <button onclick="__demoMiss(false); alert('hit')" class="rounded-[40px] bg-sticker-coral px-6 font-semibold outline-2 outline-solid outline-sticker-ink">Verify</button>
+      </div>
+      <p class="mt-2 text-[11px] text-sticker-muted">Press Enter to verify. Scanners keystroke the value + Enter.</p>
+      <button onclick="__demoMiss(true)" class="mt-2 text-[12px] font-semibold text-sticker-coral underline">Demo miss popup</button>
+    </div>
+    <div class="rounded-[20px] bg-white p-4 outline-3 outline-solid outline-sticker-ink">
+      <div class="flex items-center justify-between">
+        <h2 class="font-bold">Verified ✓</h2>
+        <span class="text-[12px] font-semibold">QR Code · 1 labels</span>
+      </div>
+      <div class="mt-3 flex justify-center"><div data-bcid="qrcode" data-text="ITEM-PASTE-42" class="barcode"></div></div>
+      <div class="mt-2 font-mono text-[11px] text-center">ITEM-PASTE-42</div>
+      <a href="/sheet/b-demo" class="mt-3 flex items-center justify-center gap-2 rounded-[40px] bg-sticker-coral py-3 font-semibold outline-3 outline-solid outline-sticker-ink">Print</a>
+    </div>
+    <p class="text-[11px] text-sticker-muted text-center">Simplest, most reliable on laptop. Camera is a later enhancement per #19.</p>
+  </div>
+</div>
+<div id="demo-miss" style="display:none" class="fixed inset-0 bg-black/50 items-center justify-center z-50">
+  <div class="w-[340px] rounded-[20px] bg-white p-6 outline-3 outline-solid outline-sticker-ink shadow-sticker">
+    <h3 class="font-display text-xl font-extrabold text-center">Code not found</h3>
+    <p class="mt-2 text-sm text-center text-sticker-muted">Not in this browser.</p>
+    <button onclick="__demoMiss(false)" class="w-full mt-4 rounded-[40px] bg-sticker-yellow py-2.5 font-semibold outline-2 outline-solid outline-sticker-ink">Try again</button>
+  </div>
+</div>

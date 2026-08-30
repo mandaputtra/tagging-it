@@ -1,0 +1,37 @@
+<!-- Variant C: camera-first with overlay guidance -->
+<div class="min-h-screen sticker-cream flex justify-center py-8">
+  <div class="w-full max-w-[420px] px-6 flex flex-col gap-4">
+    <div class="flex items-center justify-between">
+      <a href="/" class="flex h-10 w-10 items-center justify-center rounded-[12px] bg-white outline-3 outline-solid outline-sticker-ink">‹</a>
+      <h1 class="font-display text-[22px] font-extrabold">Scan Label — C (camera overlay)</h1>
+      <div class="h-10 w-10"></div>
+    </div>
+    <p class="text-[11px] font-semibold tracking-widest text-sticker-muted">VARIANT C — CAMERA-FIRST WITH OVERLAY</p>
+    <div class="rounded-[20px] bg-black p-2 outline-3 outline-solid outline-sticker-ink">
+      <div class="relative h-[260px] rounded-[14px] bg-zinc-900 flex items-center justify-center overflow-hidden">
+        <span class="text-white/70 text-sm">Camera feed</span>
+        <div class="absolute inset-8 border-2 border-dashed border-white/60 rounded-[12px] flex items-center justify-center">
+          <span class="text-white text-xs font-semibold bg-black/40 px-2 py-1 rounded">Align barcode here</span>
+        </div>
+      </div>
+      <p class="mt-2 text-center text-[11px] text-white/60">Auto-decodes on sight — zxing-wasm / BarcodeDetector</p>
+    </div>
+    <div class="rounded-[20px] bg-white p-3 outline-3 outline-solid outline-sticker-ink flex gap-2">
+      <input class="flex-1 rounded-[12px] bg-sticker-cream px-3 py-2.5 font-mono text-sm outline-2 outline-solid outline-sticker-ink" placeholder="Or type fallback…" value="CODEPRODUCT00000120260101" />
+      <button class="rounded-[40px] bg-white px-4 font-semibold outline-2 outline-solid outline-sticker-ink">Switch to input</button>
+    </div>
+    <div class="rounded-[20px] bg-white p-4 outline-3 outline-solid outline-sticker-ink">
+      <div class="flex items-center justify-between"><h2 class="font-bold">Verified ✓</h2><span class="text-[12px]">Code 128</span></div>
+      <div class="mt-3 flex justify-center"><div data-bcid="code128" data-text="CODEPRODUCT00000120260101" class="barcode"></div></div>
+      <div class="mt-2 font-mono text-[11px] text-center">CODEPRODUCT00000120260101</div>
+    </div>
+    <button onclick="__demoMiss(true)" class="text-[12px] font-semibold text-sticker-coral underline">Demo miss popup</button>
+  </div>
+</div>
+<div id="demo-miss" style="display:none" class="fixed inset-0 bg-black/50 items-center justify-center z-50">
+  <div class="w-[340px] rounded-[20px] bg-white p-6 outline-3 outline-solid outline-sticker-ink shadow-sticker">
+    <h3 class="font-display text-xl font-extrabold text-center">Code not found</h3>
+    <p class="mt-2 text-sm text-center">“<span class="font-mono">NOPE</span>” not found.</p>
+    <div class="mt-3 flex gap-2"><button onclick="__demoMiss(false)" class="flex-1 rounded-[40px] bg-sticker-yellow py-2.5 font-semibold outline-2 outline-solid outline-sticker-ink">Try again</button><button onclick="__demoMiss(false)" class="flex-1 rounded-[40px] bg-white py-2.5 font-semibold outline-2 outline-solid outline-sticker-ink">Dismiss</button></div>
+  </div>
+</div>

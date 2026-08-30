@@ -1,0 +1,51 @@
+<!-- Variant A: large camera viewport + manual fallback input -->
+<div class="min-h-screen sticker-cream flex justify-center py-8">
+  <div class="w-full max-w-[420px] px-6 flex flex-col gap-4">
+    <div class="flex items-center justify-between">
+      <a href="/" class="flex h-10 w-10 items-center justify-center rounded-[12px] bg-white outline-3 outline-solid outline-sticker-ink">‹</a>
+      <h1 class="font-display text-[22px] font-extrabold">Scan Label — A (camera + input)</h1>
+      <div class="h-10 w-10"></div>
+    </div>
+    <p class="text-[11px] font-semibold tracking-widest text-sticker-muted">VARIANT A — CAMERA VIEWPORT + MANUAL FALLBACK</p>
+    <!-- Camera viewport -->
+    <div class="rounded-[20px] bg-black p-2 outline-3 outline-solid outline-sticker-ink">
+      <div class="h-[220px] rounded-[14px] bg-zinc-900 flex items-center justify-center text-white/70 text-sm">Camera viewport — video placeholder</div>
+      <div class="mt-2 flex gap-2">
+        <button class="flex-1 rounded-[40px] bg-sticker-coral py-2.5 font-semibold outline-2 outline-solid outline-sticker-ink">Start camera</button>
+        <button class="flex-1 rounded-[40px] bg-white py-2.5 font-semibold outline-2 outline-solid outline-sticker-ink">Stop</button>
+      </div>
+    </div>
+    <!-- Manual fallback -->
+    <div class="rounded-[20px] bg-white p-4 outline-3 outline-solid outline-sticker-ink">
+      <label class="text-[12px] font-semibold">Or type / paste code</label>
+      <div class="mt-2 flex gap-2">
+        <input class="flex-1 rounded-[12px] border-2 border-sticker-ink px-3 py-2.5 font-mono text-sm" placeholder="CODEPRODUCT00000120260101" value="CODEPRODUCT00000120260101" />
+        <button onclick="__demoMiss(false); alert('hit: would navigate to Verified')" class="rounded-[40px] bg-sticker-yellow px-5 font-semibold outline-2 outline-solid outline-sticker-ink">Verify</button>
+      </div>
+      <button onclick="__demoMiss(true)" class="mt-2 text-[12px] font-semibold text-sticker-coral underline">Demo miss popup</button>
+    </div>
+    <!-- Verified card (hit) -->
+    <div class="rounded-[20px] bg-white p-4 outline-3 outline-solid outline-sticker-ink">
+      <div class="flex items-center justify-between">
+        <h2 class="font-bold">Verified ✓</h2>
+        <a href="/batches/b-demo" class="text-[12px] font-semibold underline">Batch Demo Batch</a>
+      </div>
+      <div class="mt-3 flex justify-center"><div data-bcid="code128" data-text="CODEPRODUCT00000120260101" class="barcode"></div></div>
+      <div class="mt-2 font-mono text-[11px] text-center">CODEPRODUCT00000120260101</div>
+      <div class="mt-2 text-[12px]">Seq: CODEPRODUCT00000120260101 · Item: Widget</div>
+      <a href="/sheet/b-demo" class="mt-3 flex items-center justify-center gap-2 rounded-[40px] bg-sticker-coral py-3 font-semibold outline-3 outline-solid outline-sticker-ink">Print</a>
+    </div>
+    <p class="text-[11px] text-sticker-muted text-center">Input is the pivot; camera enhances the same string. Miss → modal popup, stays on Scan.</p>
+  </div>
+</div>
+<!-- Miss popup (demo) -->
+<div id="demo-miss" style="display:none" class="fixed inset-0 bg-black/50 items-center justify-center z-50">
+  <div class="w-[340px] rounded-[20px] bg-white p-6 outline-3 outline-solid outline-sticker-ink shadow-sticker">
+    <h3 class="font-display text-xl font-extrabold text-center">Code not found</h3>
+    <p class="mt-2 text-sm text-center text-sticker-muted">“<span class="font-mono">UNKNOWN-999</span>” isn’t in this browser’s store.</p>
+    <div class="mt-4 flex gap-2">
+      <button onclick="__demoMiss(false)" class="flex-1 rounded-[40px] bg-sticker-yellow py-2.5 font-semibold outline-2 outline-solid outline-sticker-ink">Try again</button>
+      <a href="/batches/b-demo" class="flex-1 rounded-[40px] bg-white py-2.5 text-center font-semibold outline-2 outline-solid outline-sticker-ink">Go to batches</a>
+    </div>
+  </div>
+</div>

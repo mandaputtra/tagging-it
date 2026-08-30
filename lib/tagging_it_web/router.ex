@@ -23,6 +23,8 @@ defmodule TaggingItWeb.Router do
     get "/prototype/print", PrintPrototypeController, :show
     # PROTOTYPE — symbology-first home exploration (#15). Throwaway; delete after verdict.
     get "/prototype/home", HomePrototypeController, :show
+    # PROTOTYPE — scan + verified flow (#21). Throwaway; delete after verdict.
+    get "/prototype/scan", ScanPrototypeController, :show
 
     # Real SheetView print flow — batch data arrives from the browser store.
     live "/sheet/:batch_id", SheetLive

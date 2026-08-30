@@ -2,11 +2,15 @@ import { openDB, type IDBPDatabase } from "idb";
 import type { BatchRecord, CodeRecord } from "./types.js";
 
 const DB_NAME = "tagging-it";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 interface TaggingItSchema {
   batches: { key: string; value: BatchRecord };
-  codes: { key: string; value: CodeRecord; indexes: { batchId: string } };
+  codes: {
+    key: string;
+    value: CodeRecord;
+    indexes: { batchId: string; code_data: string; sequence: string };
+  };
   meta: { key: string; value: { key: string; value: unknown } };
 }
 
@@ -16,13 +20,19 @@ let dbPromise: Promise<IDBPDatabase<TaggingItSchema>> | null = null;
 export function open(): Promise<IDBPDatabase<TaggingItSchema>> {
   if (!dbPromise) {
     dbPromise = openDB<TaggingItSchema>(DB_NAME, DB_VERSION, {
-      upgrade(db) {
+      upgrade(db, oldVersion, _newVersion, transaction) {
         if (!db.objectStoreNames.contains("batches")) {
           db.createObjectStore("batches", { keyPath: "id" });
         }
         if (!db.objectStoreNames.contains("codes")) {
           const codes = db.createObjectStore("codes", { keyPath: "id" });
           codes.createIndex("batchId", "batch_id");
+          codes.createIndex("code_data", "code_data");
+          codes.createIndex("sequence", "sequence");
+        } else if (oldVersion < 2) {
+          const codes = transaction.objectStore("codes");
+          if (!codes.indexNames.contains("code_data")) codes.createIndex("code_data", "code_data");
+          if (!codes.indexNames.contains("sequence")) codes.createIndex("sequence", "sequence");
         }
         if (!db.objectStoreNames.contains("meta")) {
           db.createObjectStore("meta", { keyPath: "key" });
@@ -65,6 +75,24 @@ export async function codesByBatch(batchId: string): Promise<CodeRecord[]> {
 export async function listCodes(): Promise<CodeRecord[]> {
   const db = await open();
   return db.getAll("codes");
+}
+
+export async function getCode(id: string): Promise<CodeRecord | undefined> {
+  const db = await open();
+  return db.get("codes", id);
+}
+
+export async function codesByValue(value: string): Promise<CodeRecord[]> {
+  const db = await open();
+  try {
+    const byData = await db.getAllFromIndex("codes", "code_data", value);
+    if (byData.length) return byData;
+    return db.getAllFromIndex("codes", "sequence", value);
+  } catch {
+    // Fallback for pre-v2 stores before migration (index missing)
+    const all = await db.getAll("codes");
+    return all.filter((c) => c.code_data === value || c.sequence === value);
+  }
 }
 
 export async function deleteBatch(id: string): Promise<void> {

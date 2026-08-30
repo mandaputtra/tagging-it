@@ -9652,18 +9652,24 @@ replaceTraps((oldTraps) => __spreadProps(__spreadValues({}, oldTraps), {
 
 // js/batch_store.ts
 var DB_NAME = "tagging-it";
-var DB_VERSION = 1;
+var DB_VERSION = 2;
 var dbPromise = null;
 function open() {
   if (!dbPromise) {
     dbPromise = openDB(DB_NAME, DB_VERSION, {
-      upgrade(db) {
+      upgrade(db, oldVersion, _newVersion, transaction) {
         if (!db.objectStoreNames.contains("batches")) {
           db.createObjectStore("batches", { keyPath: "id" });
         }
         if (!db.objectStoreNames.contains("codes")) {
           const codes = db.createObjectStore("codes", { keyPath: "id" });
           codes.createIndex("batchId", "batch_id");
+          codes.createIndex("code_data", "code_data");
+          codes.createIndex("sequence", "sequence");
+        } else if (oldVersion < 2) {
+          const codes = transaction.objectStore("codes");
+          if (!codes.indexNames.contains("code_data")) codes.createIndex("code_data", "code_data");
+          if (!codes.indexNames.contains("sequence")) codes.createIndex("sequence", "sequence");
         }
         if (!db.objectStoreNames.contains("meta")) {
           db.createObjectStore("meta", { keyPath: "key" });
@@ -9696,6 +9702,21 @@ async function getBatch(id) {
 async function codesByBatch(batchId) {
   const db = await open();
   return db.getAllFromIndex("codes", "batchId", batchId);
+}
+async function getCode(id) {
+  const db = await open();
+  return db.get("codes", id);
+}
+async function codesByValue(value) {
+  const db = await open();
+  try {
+    const byData = await db.getAllFromIndex("codes", "code_data", value);
+    if (byData.length) return byData;
+    return db.getAllFromIndex("codes", "sequence", value);
+  } catch (e) {
+    const all = await db.getAll("codes");
+    return all.filter((c) => c.code_data === value || c.sequence === value);
+  }
 }
 async function deleteBatch(id) {
   const db = await open();
@@ -58998,6 +59019,65 @@ Hooks2.BatchDetailLoader = {
       this.pushEvent("detail:loaded", buildBatchDetailPayload(batch, codes));
     } catch (err) {
       console.error("BatchDetailLoader: failed to load batch from store", err);
+    }
+  }
+};
+Hooks2.ScanLoader = {
+  mounted() {
+    const input = this.el.querySelector("#scan-input");
+    const btn = this.el.querySelector("#scan-verify");
+    if (!input || !btn) return;
+    const verify = async () => {
+      const value = input.value.trim();
+      if (!value) {
+        this.pushEvent("scan:miss", { value: "" });
+        return;
+      }
+      try {
+        const hits = await codesByValue(value);
+        if (hits.length === 0) {
+          this.pushEvent("scan:miss", { value });
+        } else {
+          window.location.href = `/verified/${hits[0].id}`;
+        }
+      } catch (err) {
+        console.error("ScanLoader: lookup failed", err);
+        this.pushEvent("scan:miss", { value });
+      }
+    };
+    btn.addEventListener("click", verify);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        verify();
+      }
+    });
+  }
+};
+Hooks2.VerifiedLoader = {
+  async mounted() {
+    const codeId = this.el.dataset.codeId;
+    if (!codeId) return;
+    try {
+      const code = await getCode(codeId);
+      if (!code) return;
+      const batch = await getBatch(code.batch_id);
+      if (!batch) return;
+      this.pushEvent("verified:loaded", { batch, code });
+    } catch (err) {
+      console.error("VerifiedLoader: failed to load", err);
+    }
+  },
+  updated() {
+    const el = this.el.querySelector(".barcode");
+    if (!el || el.querySelector("svg")) return;
+    const htmlEl = el;
+    const bcid = htmlEl.dataset.bcid || "code128";
+    const text = htmlEl.dataset.text || "";
+    try {
+      el.innerHTML = ToSVG({ bcid, text });
+    } catch (err) {
+      el.textContent = `barcode error: ${err instanceof Error ? err.message : String(err)}`;
     }
   }
 };

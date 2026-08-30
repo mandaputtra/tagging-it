@@ -2,7 +2,7 @@
 // Built with esbuild: `npm run build` in assets/ → priv/static/assets/app.js.
 import { Socket } from "phoenix";
 import { LiveSocket, type Hook } from "phoenix_live_view";
-import { getBatch, codesByBatch } from "./batch_store.js";
+import { getBatch, codesByBatch, getCode, codesByValue } from "./batch_store.js";
 import { persistAndGo, deleteBatchAndRefresh } from "./batch_creator.js";
 import { buildSheetPayload, renderBarcodes } from "./sheet_bridge.js";
 import { buildBatchDetailPayload } from "./batch_detail.js";
@@ -104,6 +104,70 @@ Hooks.BatchDetailLoader = {
       this.pushEvent("detail:loaded", buildBatchDetailPayload(batch, codes));
     } catch (err) {
       console.error("BatchDetailLoader: failed to load batch from store", err);
+    }
+  },
+};
+// Scan: Variant A — input pivot + camera placeholder. On Verify, lookup
+// codesByValue (DB v2 indexes) and either navigate to /verified/:id or show
+// the miss popup via pushEvent. Camera is a future enhancement per #19.
+Hooks.ScanLoader = {
+  mounted() {
+    const input = this.el.querySelector("#scan-input") as HTMLInputElement | null;
+    const btn = this.el.querySelector("#scan-verify") as HTMLElement | null;
+    if (!input || !btn) return;
+    const verify = async () => {
+      const value = input.value.trim();
+      if (!value) {
+        this.pushEvent("scan:miss", { value: "" });
+        return;
+      }
+      try {
+        const hits = await codesByValue(value);
+        if (hits.length === 0) {
+          this.pushEvent("scan:miss", { value });
+        } else {
+          window.location.href = `/verified/${hits[0].id}`;
+        }
+      } catch (err) {
+        console.error("ScanLoader: lookup failed", err);
+        this.pushEvent("scan:miss", { value });
+      }
+    };
+    btn.addEventListener("click", verify);
+    input.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        verify();
+      }
+    });
+  },
+};
+
+// Verified: hydrate code + batch from IndexedDB and push to VerifiedLive; render barcode.
+Hooks.VerifiedLoader = {
+  async mounted() {
+    const codeId = this.el.dataset.codeId;
+    if (!codeId) return;
+    try {
+      const code = await getCode(codeId);
+      if (!code) return;
+      const batch = await getBatch(code.batch_id);
+      if (!batch) return;
+      this.pushEvent("verified:loaded", { batch, code });
+    } catch (err) {
+      console.error("VerifiedLoader: failed to load", err);
+    }
+  },
+  updated() {
+    const el = this.el.querySelector(".barcode");
+    if (!el || el.querySelector("svg")) return;
+    const htmlEl = el as HTMLElement;
+    const bcid = htmlEl.dataset.bcid || "code128";
+    const text = htmlEl.dataset.text || "";
+    try {
+      el.innerHTML = toSVG({ bcid, text });
+    } catch (err) {
+      el.textContent = `barcode error: ${err instanceof Error ? err.message : String(err)}`;
     }
   },
 };

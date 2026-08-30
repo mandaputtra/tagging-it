@@ -1,0 +1,54 @@
+<div
+  id="verified-view"
+  phx-hook="VerifiedLoader"
+  data-code-id={@code_id}
+  class="min-h-screen bg-sticker-cream font-body text-sticker-ink"
+>
+  <div class="relative mx-auto flex min-h-screen w-full max-w-[420px] flex-col px-6 pb-6 pt-3.5">
+    <div class="flex items-center justify-between">
+      <a href="/scan" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-white shadow-[3px_3px_0_0_rgba(43,42,61,0.15)] outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px]" aria-label="Back to scan">
+        {icon(:arrow_left, "h-[18px] w-[18px] text-sticker-ink")}
+      </a>
+      <h1 class="font-display text-[22px] font-extrabold text-sticker-ink">Verified</h1>
+      <div class="h-10 w-10 shrink-0"></div>
+    </div>
+
+    <%= if @error do %>
+      <div class="mt-6 rounded-[20px] bg-white p-4 shadow-sticker-card outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px]" role="alert">
+        <p class="text-[15px] font-medium text-sticker-ink">Couldn't load verified code — the payload was invalid.</p>
+        <a href="/scan" class="mt-3 inline-block rounded-[40px] bg-sticker-yellow px-4 py-2 font-display text-sm font-semibold text-sticker-ink outline-2 outline-solid outline-sticker-ink outline-offset-[-1px]">Back to scan</a>
+      </div>
+    <% else %>
+      <%= if @code do %>
+        <div class="mt-6 rounded-[20px] bg-white p-4 shadow-[4px_4px_0_0_rgba(43,42,61,0.1)] outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px]">
+          <div class="flex items-center gap-2 text-[12px] font-semibold text-emerald-600">
+            {icon(:check, "h-4 w-4 text-emerald-600")}
+            <span>Verified ✓</span>
+            <span class="text-sticker-muted">·</span>
+            <span class="text-sticker-muted"><%= symbology_name(@code) %></span>
+          </div>
+          <div class="mt-3 flex justify-center">
+            <div class="barcode" data-bcid={@code["symbology"] || "code128"} data-text={@code["code_data"]} role="img" aria-label={"Barcode #{@code["code_data"]}"}></div>
+          </div>
+          <div class="mt-2 text-center font-mono text-[12px] font-semibold text-sticker-ink"><%= @code["code_data"] %></div>
+          <div class="mt-1 text-center text-[11px] font-medium text-sticker-muted">Seq: <%= @code["sequence"] %></div>
+          <div class="mt-2 flex flex-wrap justify-center gap-1.5">
+            <span :for={field <- @code["fields"] || []} class="rounded-[8px] bg-sticker-cream px-2 py-1 text-[11px] font-medium text-sticker-ink outline-2 outline-solid outline-sticker-ink outline-offset-[-1px]"><%= field["name"] %>: <%= field["value"] %></span>
+          </div>
+        </div>
+
+        <div class="mt-3 rounded-[16px] bg-white p-3 shadow-sticker-card outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px] flex items-center justify-between">
+          <span class="text-sm font-semibold"><%= @batch["name"] || "Batch" %></span>
+          <a href={"/batches/" <> @batch["id"]} class="text-[12px] font-semibold underline">View batch →</a>
+        </div>
+
+        <a href={"/sheet/" <> @batch["id"]} class="mt-3 flex w-full items-center justify-center gap-2 rounded-[40px] bg-sticker-coral p-[14px_24px] shadow-sticker outline-3 outline-solid outline-sticker-ink outline-offset-[-1.5px]">
+          {icon(:printer, "h-[18px] w-[18px] text-sticker-ink")}
+          <span class="font-display text-[16px] font-semibold text-sticker-ink">Print</span>
+        </a>
+      <% else %>
+        <div class="py-24 text-center text-sm font-medium text-sticker-muted">Loading verified code…</div>
+      <% end %>
+    <% end %>
+  </div>
+</div>

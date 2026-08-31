@@ -80,6 +80,15 @@ defmodule TaggingItWeb.BatchDetailLiveTest do
       # SheetDelete/BatchDelete pattern: data-batch-id
       assert find(html, "[data-batch-id='#{batch.id}']") != []
     end
+    test "each code row links to its code detail page" do
+      {:ok, view, _html} = live(build_conn(), "/batches/b1")
+      %{batch: batch, codes: codes} = sample_batch()
+      view |> render_hook("detail:loaded", wire_payload(batch, codes))
+      html = render(view)
+      for code <- codes do
+        assert find(html, "a[href='/codes/#{code.id}']") != []
+      end
+    end
   end
 
   defp find(html, selector) do

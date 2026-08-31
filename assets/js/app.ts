@@ -6,6 +6,7 @@ import { getBatch, codesByBatch, getCode, codesByValue } from "./batch_store.js"
 import { persistAndGo, persistAndGoDetail, deleteBatchAndRefresh } from "./batch_creator.js";
 import { buildSheetPayload, renderBarcodes } from "./sheet_bridge.js";
 import { buildBatchDetailPayload } from "./batch_detail.js";
+import { buildCodeDetailPayload } from "./code_detail.js";
 import { RecentBatches, recentBatchesPayload } from "./recent_batches.js";
 import { toSVG } from "bwip-js/browser";
 import type { BatchCreatedWire } from "./types.js";
@@ -116,6 +117,35 @@ Hooks.BatchDetailLoader = {
       this.pushEvent("detail:loaded", buildBatchDetailPayload(batch, codes));
     } catch (err) {
       console.error("BatchDetailLoader: failed to load batch from store", err);
+    }
+  },
+};
+// CodeDetail: hydrate one code + its batch from IndexedDB and push to
+// CodeDetailLive (#24); render the barcode after each server morph.
+Hooks.CodeDetailLoader = {
+  async mounted() {
+    const codeId = this.el.dataset.codeId;
+    if (!codeId) return;
+    try {
+      const code = await getCode(codeId);
+      if (!code) return;
+      const batch = await getBatch(code.batch_id);
+      if (!batch) return;
+      this.pushEvent("code:loaded", buildCodeDetailPayload(batch, code));
+    } catch (err) {
+      console.error("CodeDetailLoader: failed to load", err);
+    }
+  },
+  updated() {
+    const el = this.el.querySelector(".barcode");
+    if (!el || el.querySelector("svg")) return;
+    const htmlEl = el as HTMLElement;
+    const bcid = htmlEl.dataset.bcid || "code128";
+    const text = htmlEl.dataset.text || "";
+    try {
+      el.innerHTML = toSVG({ bcid, text });
+    } catch (err) {
+      el.textContent = `barcode error: ${err instanceof Error ? err.message : String(err)}`;
     }
   },
 };

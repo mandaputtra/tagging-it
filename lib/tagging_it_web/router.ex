@@ -31,6 +31,7 @@ defmodule TaggingItWeb.Router do
     live "/batches/new", ChooseTypeLive
     live "/batches/new/:symbology", BatchFormLive
     live "/codes/new", SingleCodeLive
+    live "/codes/:code_id", CodeDetailLive
     live "/batches/:batch_id", BatchDetailLive
     live "/scan", ScanLive
     live "/verified/:code_id", VerifiedLive

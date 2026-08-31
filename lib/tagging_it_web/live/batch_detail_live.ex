@@ -51,7 +51,8 @@ defmodule TaggingItWeb.BatchDetailLive do
       "M16 12h.01",
       "M21 12h.01",
       "M12 21v-1"
-    ]
+    ],
+    chevron: ["m9 18 6-6-6-6"]
   }
 
   @impl true

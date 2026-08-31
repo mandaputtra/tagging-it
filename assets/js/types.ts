@@ -85,6 +85,12 @@ export interface BatchDetailWire {
   codes: CodeRecord[];
 }
 
+/** Payload for the `code:loaded` event pushed to CodeDetailLive (#24). */
+export interface CodeDetailWire {
+  batch: BatchRecord;
+  code: CodeRecord;
+}
+
 /** Payload for the `sheet:update_field` event (field value edit). */
 export interface UpdateFieldWire {
   code_id: string;

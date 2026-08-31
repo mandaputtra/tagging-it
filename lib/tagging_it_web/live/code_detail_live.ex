@@ -5,10 +5,10 @@ defmodule TaggingItWeb.CodeDetailLive do
   The batch detail code list links each row to `GET /codes/:code_id`; the free
   tier is browser-only, so the client hook `CodeDetailLoader` reads the code +
   its batch from IndexedDB (`getCode` + `getBatch`) and pushes `code:loaded`
-  (wire: batch + code as string-key maps). Valid payload renders barcode +
-  fields + batch breadcrumb + Print; invalid payload renders an error (no
-  crash). Mirrors VerifiedLive but with batch-detail context (neutral branding,
-  back to the batch) — the Verified view stays scan-branded per #22.
+  (wire: batch + code as string-key maps). Valid payload renders the Detail
+  Code frame (code card + details card) without verified badges, mirroring the
+  Verified Code design minus the Success Hero. Invalid payload renders an error
+  (no crash).
   """
 
   use TaggingItWeb, :live_view
@@ -23,6 +23,12 @@ defmodule TaggingItWeb.CodeDetailLive do
     "pdf417" => "PDF417",
     "datamatrix" => "DataMatrix",
     "azteccode" => "Aztec"
+  }
+
+  @label_names %{
+    "avery5160" => "Avery 5160 — 1\" × 2⅝\"",
+    "custom_2x1" => "Custom 2\" × 1\"",
+    "custom_50x25" => "Custom 50mm × 25mm"
   }
 
   @icon_paths %{
@@ -101,5 +107,24 @@ defmodule TaggingItWeb.CodeDetailLive do
 
   defp symbology_name(code) do
     Map.get(@names, code["symbology"] || "", "")
+  end
+
+  defp label_size_name(batch) do
+    id = get_in(batch || %{}, ["template", "label_size"]) || batch["label_size"] || ""
+    Map.get(@label_names, id, id)
+  end
+
+  defp format_created(nil), do: "—"
+
+  defp format_created(iso) when is_binary(iso) do
+    # Prefer DateTime (has timezone) then fall back to date-only slice — matches landing_live
+    case DateTime.from_iso8601(iso) do
+      {:ok, dt, _off} -> Calendar.strftime(dt, "%b %-d, %Y")
+      _ ->
+        case Date.from_iso8601(String.slice(iso, 0, 10)) do
+          {:ok, d} -> Calendar.strftime(d, "%b %-d, %Y")
+          _ -> String.slice(iso, 0, 10)
+        end
+    end
   end
 end

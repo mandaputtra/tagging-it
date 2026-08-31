@@ -12,30 +12,38 @@ defmodule TaggingItWeb.CodeDetailLiveTest do
     assert html =~ "Loading"
   end
 
-  test "renders code detail with barcode placeholder and batch breadcrumb on hit" do
+  test "renders code detail with barcode placeholder, pills and details card on hit" do
     {:ok, view, _html} = live(build_conn(), "/codes/c-1")
     %{batch: batch, codes: [code | _]} = sample_batch()
     view |> render_hook("code:loaded", wire_code(batch, code))
     html = render(view)
 
     assert text(html) =~ code.code_data
-    assert text(html) =~ code.sequence
-    # back arrow to the batch (not scan — this entry is batch detail)
+    # back arrow to the batch
     assert find(html, "a[href='/batches/#{batch.id}']") != []
-    # print entry
-    assert find(html, "a[href='/sheet/#{batch.id}']") != []
     # barcode placeholder the hook renders into
-    assert find(html, ".barcode[data-text='#{code.code_data}']") != []
+    assert find(html, ".barcode[data-text='#{code.code_data}'][data-bcid='qrcode']") != []
+    # pill row inside code card
+    assert text(html) =~ "QR Code"
+    assert text(html) =~ batch.name
+    # details card rows
+    assert text(html) =~ "Batch"
+    assert text(html) =~ "Code type"
+    assert text(html) =~ "Label size"
+    assert text(html) =~ "Avery 5160"
+    assert text(html) =~ "Created"
   end
 
-  test "renders field chips from the code's field map" do
+  test "renders field rows from the code's field map" do
     {:ok, view, _html} = live(build_conn(), "/codes/c-1")
     %{batch: batch, codes: [code | _]} = sample_batch()
     code = %{code | fields: [%{name: "item", value: "widget"}, %{name: "note", value: "fragile"}]}
     view |> render_hook("code:loaded", wire_code(batch, code))
     html = render(view)
-    assert text(html) =~ "item: widget"
-    assert text(html) =~ "note: fragile"
+    assert text(html) =~ "item"
+    assert text(html) =~ "widget"
+    assert text(html) =~ "note"
+    assert text(html) =~ "fragile"
   end
 
   test "shows error when payload is invalid" do

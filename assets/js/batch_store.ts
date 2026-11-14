@@ -67,9 +67,14 @@ export async function getBatch(id: string): Promise<BatchRecord | undefined> {
   return db.get("batches", id);
 }
 
+function compareSequence(a: CodeRecord, b: CodeRecord): number {
+  return a.sequence.localeCompare(b.sequence, undefined, { numeric: true });
+}
+
 export async function codesByBatch(batchId: string): Promise<CodeRecord[]> {
   const db = await open();
-  return db.getAllFromIndex("codes", "batchId", batchId);
+  const codes = await db.getAllFromIndex("codes", "batchId", batchId);
+  return codes.sort(compareSequence);
 }
 
 export async function listCodes(): Promise<CodeRecord[]> {

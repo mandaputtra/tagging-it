@@ -9699,9 +9699,13 @@ async function getBatch(id) {
   const db = await open();
   return db.get("batches", id);
 }
+function compareSequence(a, b) {
+  return a.sequence.localeCompare(b.sequence, void 0, { numeric: true });
+}
 async function codesByBatch(batchId) {
   const db = await open();
-  return db.getAllFromIndex("codes", "batchId", batchId);
+  const codes = await db.getAllFromIndex("codes", "batchId", batchId);
+  return codes.sort(compareSequence);
 }
 async function getCode(id) {
   const db = await open();

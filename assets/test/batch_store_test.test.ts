@@ -27,6 +27,27 @@ describe("batch_store", () => {
     expect(codes.map((c) => c.id).sort()).toEqual(["c1", "c2"]);
   });
 
+  it("codesByBatch orders pattern codes by sequence, not by id", async () => {
+    await store.putCodes([
+      { ...makeCode("c30", "b1", "CODEPRODUCT00003020261113"), sequence: "CODEPRODUCT00003020261113" },
+      { ...makeCode("c1", "b1", "CODEPRODUCT00000120261113"), sequence: "CODEPRODUCT00000120261113" },
+      { ...makeCode("c9", "b1", "CODEPRODUCT00000920261113"), sequence: "CODEPRODUCT00000920261113" },
+    ]);
+    expect((await store.codesByBatch("b1")).map((c) => c.sequence)).toEqual([
+      "CODEPRODUCT00000120261113",
+      "CODEPRODUCT00000920261113",
+      "CODEPRODUCT00003020261113",
+    ]);
+  });
+
+  it("codesByBatch orders paste sequences numerically", async () => {
+    await store.putCodes([
+      { ...makeCode("c10", "b1", "ABC-010"), sequence: "10" },
+      { ...makeCode("c2", "b1", "ABC-002"), sequence: "2" },
+    ]);
+    expect((await store.codesByBatch("b1")).map((c) => c.sequence)).toEqual(["2", "10"]);
+  });
+
   it("listBatches returns all batches", async () => {
     await store.putBatch(makeBatch("b1"));
     await store.putBatch(makeBatch("b2", "Batch Two"));

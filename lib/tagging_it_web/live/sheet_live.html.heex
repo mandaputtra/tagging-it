@@ -143,8 +143,8 @@
   #sheet-view .sheet { width: 8.5in; min-height: 11in; margin: 0 auto 24px; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); box-sizing: border-box; padding: 0.5in 0.3125in; display: flex; flex-wrap: wrap; align-content: flex-start; font-family: system-ui, -apple-system, sans-serif; }
   #sheet-view .sheet-stack { overflow-x: auto; }
   #sheet-view .label { width: 2.625in; height: 1in; box-sizing: border-box; padding: 2px 4px; display: flex; flex-direction: column; justify-content: center; gap: 1px; font-size: 9px; break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; border-bottom: 1px dotted #e5e7eb; }
-  #sheet-view .barcode { text-align: center; }
-  #sheet-view .barcode svg { max-width: 100%; height: auto; }
+  #sheet-view .barcode { flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center; }
+  #sheet-view .barcode svg { width: auto; height: 100%; max-width: 100%; max-height: 100%; }
   #sheet-view .line { display: flex; align-items: center; gap: 3px; white-space: nowrap; overflow: hidden; }
   #sheet-view .line-name { font-weight: 700; flex-shrink: 0; }
   #sheet-view .line-form { flex: 1; min-width: 0; display: flex; }
@@ -160,7 +160,8 @@
     #sheet-view .sheet-info,
     #sheet-view .sheet-page,
     #sheet-view .sheet-actions { display: none !important; }
-    #sheet-view .sheet-preview { height: auto !important; overflow: visible !important; padding: 0 !important; background: transparent !important; box-shadow: none !important; outline: none !important; border-radius: 0 !important; }
+    #sheet-view .sheet-preview { height: auto !important; overflow: visible !important; margin: 0 !important; padding: 0 !important; background: transparent !important; box-shadow: none !important; outline: none !important; border-radius: 0 !important; }
+    #sheet-view > div { padding: 0 !important; }
     #sheet-view .sheet-stack { overflow: visible; }
     #sheet-view .sheet { margin: 0; box-shadow: none; border: none; }
     #sheet-view .label { border: none; }
